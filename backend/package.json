@@ -1,0 +1,15 @@
+{
+  "name": "fitness-backend",
+  "version": "1.0.0",
+  "description": "Express API: validates requests and forwards to the Python ML service",
+  "type": "commonjs",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

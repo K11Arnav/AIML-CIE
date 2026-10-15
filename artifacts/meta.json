@@ -1,0 +1,24 @@
+{
+  "version": "1.2",
+  "random_state": 42,
+  "diet_target": "Diet_Recommendation",
+  "workout_classifier": "BLOCKED: no defensible target (Gym Members dataset absent; program titles are catalog entries, not outcome labels)",
+  "food_catalog": {
+    "file": "indian_catalog.csv",
+    "source": "healthy_foods_database.csv (filtered, see ml/indian_catalog.py)",
+    "rows": 100,
+    "indian_dishes": 9,
+    "staple_ingredients": 91,
+    "allergen_data": false,
+    "use": "sole active food catalog: Indian-food-only recommendations"
+  },
+  "knn_features": [
+    "energy_kcal",
+    "fat_100g",
+    "carbs_100g",
+    "sugars_100g",
+    "fiber_100g",
+    "proteins_100g",
+    "sodium_100g"
+  ]
+}

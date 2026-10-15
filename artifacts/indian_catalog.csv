@@ -1,0 +1,101 @@
+product_name,food_type,energy_kcal,proteins_100g,fat_100g,carbs_100g,fiber_100g,sugars_100g,health_score,sodium_100g,cuisine_evidence,evidence_term,is_branded
+"Bread, chapati or roti, whole wheat, commercially prepared, frozen",Grains,299.0,7.85,9.2,46.1,9.7,2.93,60,0.298,indian_dish,chapati,False
+"Bread, naan, whole wheat, commercially prepared, refrigerated",Grains,286.0,10.2,6.7,46.2,4.8,3.4,70,0.467,indian_dish,naan,False
+"Cabbage, savoy, raw",Vegetables,113.0,2.0,0.1,6.1,3.1,2.27,65,0.028,staple_ingredient,Cabbage,False
+"Carrots, frozen, cooked, boiled, drained, with salt",Vegetables,155.0,0.58,0.68,7.73,3.3,4.08,60,0.295,staple_ingredient,Carrots,False
+"Carrots, frozen, cooked, boiled, drained, without salt",Vegetables,155.0,0.58,0.68,7.73,3.3,4.08,60,0.059,staple_ingredient,Carrots,False
+"Carrots, frozen, unprepared (Includes foods for USDA's Food Distribution Program)",Vegetables,152.0,0.78,0.46,7.9,3.3,4.76,60,0.068,staple_ingredient,Carrots,False
+"Carrots, mature, raw",Vegetables,45.0,0.941,0.351,10.3,3.1,,60,0.0866,staple_ingredient,Carrots,False
+"Cauliflower, green, cooked, no salt added",Vegetables,134.0,3.04,0.31,6.28,3.3,3.12,65,0.023,staple_ingredient,Cauliflower,False
+"Cauliflower, green, cooked, with salt",Vegetables,136.0,3.04,0.31,6.28,3.3,,65,0.259,staple_ingredient,Cauliflower,False
+"Cauliflower, green, raw",Vegetables,31.0,2.95,0.3,6.09,3.2,3.03,65,0.023,staple_ingredient,Cauliflower,False
+Chickpea flour (besan),Other,387.0,22.4,6.69,57.8,10.8,10.8,70,0.064,indian_dish,besan,False
+"Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",Other,139.0,7.05,2.77,22.5,6.4,4.01,60,0.246,staple_ingredient,Chickpeas (garbanzo beans,False
+"Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained, rinsed in tap water",Other,578.0,7.04,2.47,22.9,6.3,4.0,60,0.212,staple_ingredient,Chickpeas (garbanzo beans,False
+"Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, solids and liquids",Other,369.0,4.92,1.95,13.5,4.4,,60,0.278,staple_ingredient,Chickpeas (garbanzo beans,False
+"Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, solids and liquids, low sodium",Other,88.0,4.92,1.95,13.5,4.4,2.59,60,0.132,staple_ingredient,Chickpeas (garbanzo beans,False
+"Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, with salt",Other,686.0,8.86,2.59,27.4,7.6,4.8,60,0.243,staple_ingredient,Chickpeas (garbanzo beans,False
+"Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",Other,164.0,8.86,2.59,27.4,7.6,4.8,60,0.007,staple_ingredient,Chickpeas (garbanzo beans,False
+"Chickpeas, (garbanzo beans, bengal gram), dry",Other,372.0,21.3,6.27,60.4,,,60,0.00878,staple_ingredient,Chickpeas,False
+"Flour, semolina, coarse and semi-coarse",Grains,365.0,11.7,1.6,73.8,3.22,,70,0.0,staple_ingredient,Flour,False
+"Flour, semolina, fine",Grains,366.0,13.3,1.84,72.0,3.68,,70,0.000426,staple_ingredient,Flour,False
+"Guavas, common, raw",Fruits,68.0,2.55,0.95,14.3,5.4,8.92,65,0.002,staple_ingredient,Guavas,False
+"Guavas, strawberry, raw",Fruits,69.0,0.58,0.6,17.4,5.4,,65,0.037,staple_ingredient,Guavas,False
+"Lentils, dry",Other,351.0,23.6,1.92,62.2,,,60,0.0,staple_ingredient,Lentils,False
+"Lentils, mature seeds, cooked, boiled, with salt",Other,477.0,9.02,0.38,19.5,7.9,1.8,60,0.238,staple_ingredient,Lentils,False
+"Lentils, mature seeds, cooked, boiled, without salt",Other,116.0,9.02,0.38,20.1,7.9,1.8,60,0.002,staple_ingredient,Lentils,False
+"Lentils, raw",Other,352.0,24.6,1.06,63.4,10.7,2.03,70,0.006,staple_ingredient,Lentils,False
+"Nuts, almonds",Other,579.0,21.2,49.9,21.6,12.5,4.35,70,0.001,staple_ingredient,Nuts,False
+"Nuts, almonds, blanched",Other,590.0,21.4,52.5,18.7,9.9,4.63,70,0.019,staple_ingredient,Nuts,False
+"Nuts, almonds, oil roasted, lightly salted",Other,607.0,21.2,55.2,17.7,10.5,4.55,70,0.143,staple_ingredient,Nuts,False
+"Nuts, almonds, oil roasted, with salt added",Other,607.0,21.2,55.2,17.7,10.5,4.55,70,0.339,staple_ingredient,Nuts,False
+"Nuts, almonds, whole, raw",Other,584.0,21.5,51.1,20.0,10.8,,70,0.0,staple_ingredient,Nuts,False
+"Nuts, cashew nuts, oil roasted, with salt added",Other,581.0,16.8,47.8,30.2,3.3,5.01,60,0.308,staple_ingredient,Nuts,False
+"Nuts, cashew nuts, raw",Other,533.0,17.4,38.9,36.3,4.1,,70,0.0047599999999999995,staple_ingredient,Nuts,False
+"Nuts, cashew nuts, raw",Other,553.0,18.2,43.8,30.2,3.3,5.91,60,0.012,staple_ingredient,Nuts,False
+"Okra, raw",Vegetables,33.0,1.93,0.19,7.45,3.2,1.48,65,0.007,staple_ingredient,Okra,False
+Papad,Other,371.0,25.6,3.25,59.9,18.6,0.0,60,1.74,indian_dish,papad,False
+"Peanuts, all types, dry-roasted, without salt",Other,587.0,24.4,49.7,21.3,8.4,4.9,60,0.006,staple_ingredient,Peanuts,False
+"Peanuts, all types, oil-roasted, with salt",Other,599.0,28.0,52.5,15.3,9.4,4.18,60,0.32,staple_ingredient,Peanuts,False
+"Peanuts, all types, oil-roasted, without salt",Other,599.0,28.0,52.5,15.3,9.4,4.18,60,0.006,staple_ingredient,Peanuts,False
+"Peanuts, all types, raw",Other,567.0,25.8,49.2,16.1,8.5,4.72,60,0.018,staple_ingredient,Peanuts,False
+"Peanuts, raw",Other,551.0,23.2,43.3,26.5,8.01,,70,0.00149,staple_ingredient,Peanuts,False
+"Peanuts, spanish, oil-roasted, with salt",Other,579.0,28.0,49.0,17.4,8.9,,60,0.433,staple_ingredient,Peanuts,False
+"Peanuts, spanish, oil-roasted, without salt",Other,579.0,28.0,49.0,17.4,8.9,,60,0.006,staple_ingredient,Peanuts,False
+"Peanuts, valencia, oil-roasted, without salt",Other,589.0,27.0,51.2,16.3,8.9,,60,0.006,staple_ingredient,Peanuts,False
+"Peanuts, valencia, raw",Other,570.0,25.1,47.6,20.9,8.7,,60,0.001,staple_ingredient,Peanuts,False
+"Peanuts, virginia, oil-roasted, with salt",Other,578.0,25.9,48.6,19.9,8.9,,60,0.433,staple_ingredient,Peanuts,False
+"Peanuts, virginia, oil-roasted, without salt",Other,578.0,25.9,48.6,19.9,8.9,,60,0.006,staple_ingredient,Peanuts,False
+"Peanuts, virginia, raw",Other,563.0,25.2,48.8,16.5,8.5,3.95,60,0.01,staple_ingredient,Peanuts,False
+"Peas and carrots, canned, no salt added, solids and liquids",Vegetables,38.0,2.17,0.27,8.48,3.3,2.83,60,0.004,staple_ingredient,Peas and carrots,False
+"Peas and carrots, frozen, cooked, boiled, drained, with salt",Vegetables,201.0,3.09,0.42,10.1,3.1,4.36,60,0.304,staple_ingredient,Peas and carrots,False
+"Peas and carrots, frozen, cooked, boiled, drained, without salt",Vegetables,48.0,3.09,0.42,10.1,3.1,4.36,60,0.068,staple_ingredient,Peas and carrots,False
+"Peas and carrots, frozen, unprepared",Vegetables,53.0,3.4,0.47,11.2,3.4,,65,0.079,staple_ingredient,Peas and carrots,False
+"Peas and onions, frozen, unprepared",Vegetables,70.0,3.98,0.32,13.5,3.5,,65,0.061,staple_ingredient,Peas and onions,False
+"Potatoes, baked, skin only, with salt",Vegetables,198.0,4.29,0.1,46.1,7.9,1.4,65,0.257,staple_ingredient,Potatoes,False
+"Potatoes, baked, skin, without salt",Vegetables,198.0,4.29,0.1,46.1,7.9,1.4,65,0.021,staple_ingredient,Potatoes,False
+"Potatoes, boiled, cooked in skin, skin, with salt",Vegetables,78.0,2.86,0.1,17.2,3.3,,60,0.25,staple_ingredient,Potatoes,False
+"Potatoes, boiled, cooked in skin, skin, without salt",Vegetables,78.0,2.86,0.1,17.2,3.3,,60,0.014,staple_ingredient,Potatoes,False
+"Potatoes, gold, without skin, raw",Vegetables,71.6,1.81,0.264,16.0,13.2,0.645,65,0.0022400000000000002,staple_ingredient,Potatoes,False
+"Potatoes, microwaved, cooked in skin, skin, without salt",Vegetables,132.0,4.39,0.1,29.6,5.5,,65,0.016,staple_ingredient,Potatoes,False
+"Potatoes, microwaved, cooked, in skin, skin with salt",Vegetables,554.0,4.39,0.1,29.6,5.5,,65,0.252,staple_ingredient,Potatoes,False
+"Potatoes, red, without skin, raw",Vegetables,73.4,2.06,0.248,16.3,12.9,0.664,65,0.0028599999999999997,staple_ingredient,Potatoes,False
+"Potatoes, russet, without skin, raw",Vegetables,81.0,2.27,0.36,17.8,13.8,0.526,65,0.0027400000000000002,staple_ingredient,Potatoes,False
+"Rice, black, unenriched, raw",Grains,361.0,7.57,3.44,77.2,4.18,,60,0.0,staple_ingredient,Rice,False
+"Rice, brown, long grain, unenriched, raw",Grains,368.0,7.25,3.31,76.7,3.02,,60,0.0,staple_ingredient,Rice,False
+"Rice, brown, medium-grain, raw (Includes foods for USDA's Food Distribution Program)",Grains,362.0,7.5,2.68,76.2,3.4,,60,0.004,staple_ingredient,Rice,False
+"Rice, red, unenriched, dry, raw",Grains,360.0,8.56,3.44,76.2,4.2,,60,0.000438,staple_ingredient,Rice,False
+"Semolina, enriched",Grains,360.0,12.7,1.05,72.8,3.9,,70,0.001,staple_ingredient,Semolina,False
+"Semolina, unenriched",Grains,360.0,12.7,1.05,72.8,3.9,,70,0.001,staple_ingredient,Semolina,False
+"Spices, bay leaf",Other,313.0,7.61,8.36,75.0,26.3,,65,0.023,staple_ingredient,Spices,False
+"Spices, cinnamon, ground",Other,247.0,3.99,1.24,80.6,53.1,2.17,60,0.01,staple_ingredient,Spices,False
+"Spices, dill weed, dried",Other,253.0,20.0,4.36,55.8,13.6,,75,0.208,staple_ingredient,Spices,False
+"Spices, fenugreek seed",Other,323.0,23.0,6.41,58.4,24.6,,70,0.067,staple_ingredient,Spices,False
+"Spices, garlic powder",Other,331.0,16.6,0.73,72.7,9.0,2.43,70,0.06,staple_ingredient,Spices,False
+"Spices, ginger, ground",Other,335.0,8.98,4.24,71.6,14.1,3.39,60,0.027,staple_ingredient,Spices,False
+"Spices, mustard seed, ground",Other,508.0,26.1,36.2,28.1,12.2,6.79,70,0.013,staple_ingredient,Spices,False
+"Spices, parsley, dried",Other,292.0,26.6,5.48,50.6,26.7,7.27,75,0.452,staple_ingredient,Spices,False
+"Spices, poppy seed",Other,525.0,18.0,41.6,28.1,19.5,2.99,70,0.026,staple_ingredient,Spices,False
+"Spices, saffron",Other,310.0,11.4,5.85,65.4,3.9,,75,0.148,staple_ingredient,Spices,False
+"Spices, savory, ground",Other,272.0,6.73,5.91,68.7,45.7,,65,0.024,staple_ingredient,Spices,False
+"Spices, tarragon, dried",Other,295.0,22.8,7.24,50.2,7.4,,75,0.062,staple_ingredient,Spices,False
+"Spinach, frozen, chopped or leaf, cooked, boiled, drained, with salt",Vegetables,34.0,4.01,0.87,4.8,3.7,0.51,60,0.322,staple_ingredient,Spinach,False
+"Spinach, frozen, chopped or leaf, cooked, boiled, drained, without salt",Vegetables,143.0,4.01,0.87,4.8,3.7,0.51,60,0.097,staple_ingredient,Spinach,False
+Tomato powder,Vegetables,302.0,12.9,0.44,74.7,16.5,43.9,65,0.134,staple_ingredient,Tomato powder,False
+"Tomato, paste, canned, without salt added",Vegetables,88.5,4.23,0.732,20.2,4.7,11.7,65,0.061200000000000004,staple_ingredient,Tomato,False
+"Tomatoes, sun-dried",Vegetables,258.0,14.1,2.97,55.8,12.3,37.6,65,0.107,staple_ingredient,Tomatoes,False
+"Tomatoes, sun-dried, packed in oil, drained",Vegetables,213.0,5.06,14.1,23.3,5.8,,65,0.266,staple_ingredient,Tomatoes,False
+"Wheat flour, white (industrial), 11.5% protein, bleached, enriched",Grains,363.0,11.5,1.45,73.8,2.4,1.12,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, white (industrial), 11.5% protein, unbleached, enriched",Grains,363.0,11.5,1.45,73.8,2.4,1.12,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, white (industrial), 13% protein, bleached, unenriched",Grains,362.0,13.1,1.38,72.2,2.4,1.1,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, white (industrial), 15% protein, bleached, unenriched",Grains,362.0,15.3,1.41,69.9,2.4,0.92,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, white, all-purpose, enriched, bleached",Grains,364.0,10.3,0.98,76.3,2.7,0.27,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, white, all-purpose, enriched, calcium-fortified",Grains,364.0,10.3,0.98,76.3,2.7,,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, white, all-purpose, enriched, unbleached",Grains,364.0,10.3,0.98,76.3,2.7,0.27,60,0.002,staple_ingredient,Wheat flour,False
+"Wheat flour, whole-grain, soft wheat",Grains,332.0,9.61,1.95,74.5,13.1,1.02,60,0.003,staple_ingredient,Wheat flour,False
+"Wheat flours, bread, unenriched",Grains,361.0,12.0,1.66,72.5,2.4,0.31,60,0.002,staple_ingredient,Wheat flours,False
+ ORGANIC BENGAL GRAM SPLIT CHANA DAL,Vegetables,470.0,20.0,0.0,59.0,8.0,0.0,70,0.01,indian_dish,bengal gram split,True
+"365 EVERYDAY VALUE, TANDOORI WHOLE WHEAT NAAN",Other,306.0,8.24,8.24,48.2,5.9,4.71,60,0.494,indian_dish,tandoori whole,True
+AUTHENTIC INDIAN BLACK GRAM LENTILS CURRY DAL BUKHARA,Other,112.0,4.0,6.4,10.4,4.8,0.0,60,0.488,indian_dish,dal bukhara,True
+AUTHENTIC INDIAN CHICK PEAS CURRY PINDI CHANA,Other,160.0,3.2,8.8,16.8,4.8,0.0,60,0.456,indian_dish,pindi chana,True
+AUTHENTIC PAPADUMS,Snacks & Sweets,250.0,20.0,0.0,40.0,20.0,0.0,60,1.4,indian_dish,papad,True

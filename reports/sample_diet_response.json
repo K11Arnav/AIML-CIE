@@ -1,0 +1,2636 @@
+{
+    "success": true,
+    "recommendation_type": "diet",
+    "diet_category": {
+        "diet_category": "Balanced",
+        "probabilities": {
+            "Balanced": 0.4615,
+            "Low_Carb": 0.1547,
+            "Low_Sodium": 0.3838
+        },
+        "model": "RandomForest",
+        "version": "1.2",
+        "note": "Informational only; Disease_Type intentionally excluded from features.",
+        "explanation": {
+            "predicted_category": "Balanced",
+            "probabilities": {
+                "Balanced": 0.4615,
+                "Low_Carb": 0.1547,
+                "Low_Sodium": 0.3838
+            },
+            "input_features": {
+                "Age": 30,
+                "Gender": "Female",
+                "Weight_kg": 65,
+                "Height_cm": 165,
+                "BMI": 23.875114784205696,
+                "Severity": "Moderate",
+                "Physical_Activity_Level": "Active",
+                "Daily_Caloric_Intake": 2200,
+                "Cholesterol_mg/dL": 180,
+                "Blood_Pressure_mmHg": 120,
+                "Glucose_mg/dL": 100,
+                "Dietary_Restrictions": null,
+                "Allergies": null,
+                "Preferred_Cuisine": null,
+                "Weekly_Exercise_Hours": 5,
+                "Adherence_to_Diet_Plan": 85,
+                "Dietary_Nutrient_Imbalance_Score": 1.5
+            },
+            "goal_independent": "The user's goal is NOT a model feature: the category is predicted from the health profile only, so a weight-loss goal can still yield 'Balanced'. This is by design, not a bug; the category was never hardcoded to match the goal.",
+            "top_features": [
+                {
+                    "feature": "Cholesterol_mg/dL",
+                    "importance": 0.07910924950703033
+                },
+                {
+                    "feature": "Weekly_Exercise_Hours",
+                    "importance": 0.0777458737669044
+                },
+                {
+                    "feature": "Glucose_mg/dL",
+                    "importance": 0.07760697217868537
+                },
+                {
+                    "feature": "Adherence_to_Diet_Plan",
+                    "importance": 0.07755559745413587
+                },
+                {
+                    "feature": "Daily_Caloric_Intake",
+                    "importance": 0.07626373770067837
+                },
+                {
+                    "feature": "Weight_kg",
+                    "importance": 0.06941271053983787
+                },
+                {
+                    "feature": "BMI",
+                    "importance": 0.06883935392513528
+                },
+                {
+                    "feature": "Blood_Pressure_mmHg",
+                    "importance": 0.06822454909218646
+                }
+            ],
+            "target_distribution": {
+                "Balanced": 426,
+                "Low_Sodium": 316,
+                "Low_Carb": 258
+            },
+            "test_metrics": {
+                "accuracy": 0.39,
+                "f1_macro": 0.3682,
+                "f1_weighted": 0.3865,
+                "dummy_accuracy": 0.38,
+                "n_train": 800,
+                "n_test": 200
+            },
+            "disclaimer": "Predicted category is a model output, not a medical diagnosis; it is predicted from the health profile only, not the user's goal."
+        }
+    },
+    "goal_profile": "balanced",
+    "category_method": "RandomForest classifier predicts the diet category from the health profile (informational only).",
+    "ranking_method": "KNN ranks catalog foods by scaled Euclidean distance to an explicit per-100g reference nutrient profile. Distance measures closeness, not suitability.",
+    "scope": "Single-food suggestions only \u2014 not a daily meal plan: the implementation does not select meal slots or portions and does not total daily nutrients.",
+    "catalog_used": {
+        "key": "indian",
+        "source_dataset": "indian_catalog.csv (derived from healthy_foods_database.csv)",
+        "rows": 100,
+        "allergen_data": false,
+        "why": "Indian-food-only catalog (dishes + staple ingredients, see ml/indian_catalog.py). No international fallback."
+    },
+    "candidate_counts": {
+        "before_filtering": 100,
+        "after_filtering": 100
+    },
+    "n_eligible": 100,
+    "restrictions_enforced": [],
+    "allergen_data": "unavailable",
+    "filter_notes": [],
+    "version": "1.2",
+    "eligible_foods": {
+        "grains": [
+            {
+                "name": "Bread, chapati or roti, whole wheat, commercially prepared, frozen",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: chapati)",
+                "energy_kcal": 299,
+                "proteins_100g": 7.85
+            },
+            {
+                "name": "Bread, naan, whole wheat, commercially prepared, refrigerated",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: naan)",
+                "energy_kcal": 286,
+                "proteins_100g": 10.2
+            },
+            {
+                "name": "Rice, black, unenriched, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Rice)",
+                "energy_kcal": 361,
+                "proteins_100g": 7.57
+            },
+            {
+                "name": "Rice, brown, long grain, unenriched, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Rice)",
+                "energy_kcal": 368,
+                "proteins_100g": 7.25
+            },
+            {
+                "name": "Rice, red, unenriched, dry, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Rice)",
+                "energy_kcal": 360,
+                "proteins_100g": 8.56
+            },
+            {
+                "name": "365 EVERYDAY VALUE, TANDOORI WHOLE WHEAT NAAN",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: tandoori whole)",
+                "energy_kcal": 306,
+                "proteins_100g": 8.24
+            }
+        ],
+        "vegetables": [
+            {
+                "name": "Cabbage, savoy, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Cabbage)",
+                "energy_kcal": 113,
+                "proteins_100g": 2
+            },
+            {
+                "name": "Carrots, frozen, cooked, boiled, drained, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Carrots)",
+                "energy_kcal": 155,
+                "proteins_100g": 0.58
+            },
+            {
+                "name": "Carrots, frozen, cooked, boiled, drained, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Carrots)",
+                "energy_kcal": 155,
+                "proteins_100g": 0.58
+            },
+            {
+                "name": "Carrots, mature, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Carrots)",
+                "energy_kcal": 45,
+                "proteins_100g": 0.941
+            },
+            {
+                "name": "Cauliflower, green, cooked, no salt added",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Cauliflower)",
+                "energy_kcal": 134,
+                "proteins_100g": 3.04
+            },
+            {
+                "name": "Cauliflower, green, cooked, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Cauliflower)",
+                "energy_kcal": 136,
+                "proteins_100g": 3.04
+            },
+            {
+                "name": "Cauliflower, green, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Cauliflower)",
+                "energy_kcal": 31,
+                "proteins_100g": 2.95
+            },
+            {
+                "name": "Okra, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Okra)",
+                "energy_kcal": 33,
+                "proteins_100g": 1.93
+            },
+            {
+                "name": "Potatoes, baked, skin only, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 198,
+                "proteins_100g": 4.29
+            },
+            {
+                "name": "Potatoes, baked, skin, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 198,
+                "proteins_100g": 4.29
+            },
+            {
+                "name": "Potatoes, boiled, cooked in skin, skin, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 78,
+                "proteins_100g": 2.86
+            },
+            {
+                "name": "Potatoes, boiled, cooked in skin, skin, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 78,
+                "proteins_100g": 2.86
+            },
+            {
+                "name": "Potatoes, gold, without skin, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 71.6,
+                "proteins_100g": 1.81
+            },
+            {
+                "name": "Potatoes, microwaved, cooked in skin, skin, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 132,
+                "proteins_100g": 4.39
+            },
+            {
+                "name": "Potatoes, microwaved, cooked, in skin, skin with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 554,
+                "proteins_100g": 4.39
+            },
+            {
+                "name": "Potatoes, red, without skin, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 73.4,
+                "proteins_100g": 2.06
+            },
+            {
+                "name": "Potatoes, russet, without skin, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Potatoes)",
+                "energy_kcal": 81,
+                "proteins_100g": 2.27
+            },
+            {
+                "name": "Spinach, frozen, chopped or leaf, cooked, boiled, drained, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spinach)",
+                "energy_kcal": 34,
+                "proteins_100g": 4.01
+            },
+            {
+                "name": "Spinach, frozen, chopped or leaf, cooked, boiled, drained, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spinach)",
+                "energy_kcal": 143,
+                "proteins_100g": 4.01
+            },
+            {
+                "name": "Tomato powder",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Tomato powder)",
+                "energy_kcal": 302,
+                "proteins_100g": 12.9
+            },
+            {
+                "name": "Tomato, paste, canned, without salt added",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Tomato)",
+                "energy_kcal": 88.5,
+                "proteins_100g": 4.23
+            },
+            {
+                "name": "Tomatoes, sun-dried",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Tomatoes)",
+                "energy_kcal": 258,
+                "proteins_100g": 14.1
+            },
+            {
+                "name": "Tomatoes, sun-dried, packed in oil, drained",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Tomatoes)",
+                "energy_kcal": 213,
+                "proteins_100g": 5.06
+            }
+        ],
+        "legumes": [
+            {
+                "name": "Carrots, frozen, unprepared (Includes foods for USDA's Food Distribution Program)",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Carrots)",
+                "energy_kcal": 152,
+                "proteins_100g": 0.78
+            },
+            {
+                "name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas (garbanzo beans)",
+                "energy_kcal": 139,
+                "proteins_100g": 7.05
+            },
+            {
+                "name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained, rinsed in tap water",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas (garbanzo beans)",
+                "energy_kcal": 578,
+                "proteins_100g": 7.04
+            },
+            {
+                "name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, solids and liquids",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas (garbanzo beans)",
+                "energy_kcal": 369,
+                "proteins_100g": 4.92
+            },
+            {
+                "name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, solids and liquids, low sodium",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas (garbanzo beans)",
+                "energy_kcal": 88,
+                "proteins_100g": 4.92
+            },
+            {
+                "name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas (garbanzo beans)",
+                "energy_kcal": 686,
+                "proteins_100g": 8.86
+            },
+            {
+                "name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas (garbanzo beans)",
+                "energy_kcal": 164,
+                "proteins_100g": 8.86
+            },
+            {
+                "name": "Chickpeas, (garbanzo beans, bengal gram), dry",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Chickpeas)",
+                "energy_kcal": 372,
+                "proteins_100g": 21.3
+            },
+            {
+                "name": "Lentils, dry",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Lentils)",
+                "energy_kcal": 351,
+                "proteins_100g": 23.6
+            },
+            {
+                "name": "Lentils, mature seeds, cooked, boiled, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Lentils)",
+                "energy_kcal": 477,
+                "proteins_100g": 9.02
+            },
+            {
+                "name": "Lentils, mature seeds, cooked, boiled, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Lentils)",
+                "energy_kcal": 116,
+                "proteins_100g": 9.02
+            },
+            {
+                "name": "Lentils, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Lentils)",
+                "energy_kcal": 352,
+                "proteins_100g": 24.6
+            },
+            {
+                "name": "Papad",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: papad)",
+                "energy_kcal": 371,
+                "proteins_100g": 25.6
+            },
+            {
+                "name": "Peas and carrots, canned, no salt added, solids and liquids",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peas and carrots)",
+                "energy_kcal": 38,
+                "proteins_100g": 2.17
+            },
+            {
+                "name": "Peas and carrots, frozen, cooked, boiled, drained, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peas and carrots)",
+                "energy_kcal": 201,
+                "proteins_100g": 3.09
+            },
+            {
+                "name": "Peas and carrots, frozen, cooked, boiled, drained, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peas and carrots)",
+                "energy_kcal": 48,
+                "proteins_100g": 3.09
+            },
+            {
+                "name": "Peas and carrots, frozen, unprepared",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peas and carrots)",
+                "energy_kcal": 53,
+                "proteins_100g": 3.4
+            },
+            {
+                "name": "Peas and onions, frozen, unprepared",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peas and onions)",
+                "energy_kcal": 70,
+                "proteins_100g": 3.98
+            },
+            {
+                "name": "Rice, brown, medium-grain, raw (Includes foods for USDA's Food Distribution Program)",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Rice)",
+                "energy_kcal": 362,
+                "proteins_100g": 7.5
+            },
+            {
+                "name": " ORGANIC BENGAL GRAM SPLIT CHANA DAL",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: bengal gram split)",
+                "energy_kcal": 470,
+                "proteins_100g": 20
+            },
+            {
+                "name": "AUTHENTIC INDIAN BLACK GRAM LENTILS CURRY DAL BUKHARA",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: dal bukhara)",
+                "energy_kcal": 112,
+                "proteins_100g": 4
+            },
+            {
+                "name": "AUTHENTIC INDIAN CHICK PEAS CURRY PINDI CHANA",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: pindi chana)",
+                "energy_kcal": 160,
+                "proteins_100g": 3.2
+            },
+            {
+                "name": "AUTHENTIC PAPADUMS",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: papad)",
+                "energy_kcal": 250,
+                "proteins_100g": 20
+            }
+        ],
+        "flours": [
+            {
+                "name": "Chickpea flour (besan)",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (indian_dish: besan)",
+                "energy_kcal": 387,
+                "proteins_100g": 22.4
+            },
+            {
+                "name": "Flour, semolina, coarse and semi-coarse",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Flour)",
+                "energy_kcal": 365,
+                "proteins_100g": 11.7
+            },
+            {
+                "name": "Flour, semolina, fine",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Flour)",
+                "energy_kcal": 366,
+                "proteins_100g": 13.3
+            },
+            {
+                "name": "Semolina, enriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Semolina)",
+                "energy_kcal": 360,
+                "proteins_100g": 12.7
+            },
+            {
+                "name": "Semolina, unenriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Semolina)",
+                "energy_kcal": 360,
+                "proteins_100g": 12.7
+            },
+            {
+                "name": "Wheat flour, white (industrial), 11.5% protein, bleached, enriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 363,
+                "proteins_100g": 11.5
+            },
+            {
+                "name": "Wheat flour, white (industrial), 11.5% protein, unbleached, enriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 363,
+                "proteins_100g": 11.5
+            },
+            {
+                "name": "Wheat flour, white (industrial), 13% protein, bleached, unenriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 362,
+                "proteins_100g": 13.1
+            },
+            {
+                "name": "Wheat flour, white (industrial), 15% protein, bleached, unenriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 362,
+                "proteins_100g": 15.3
+            },
+            {
+                "name": "Wheat flour, white, all-purpose, enriched, bleached",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 364,
+                "proteins_100g": 10.3
+            },
+            {
+                "name": "Wheat flour, white, all-purpose, enriched, calcium-fortified",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 364,
+                "proteins_100g": 10.3
+            },
+            {
+                "name": "Wheat flour, white, all-purpose, enriched, unbleached",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 364,
+                "proteins_100g": 10.3
+            },
+            {
+                "name": "Wheat flour, whole-grain, soft wheat",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flour)",
+                "energy_kcal": 332,
+                "proteins_100g": 9.61
+            },
+            {
+                "name": "Wheat flours, bread, unenriched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Wheat flours)",
+                "energy_kcal": 361,
+                "proteins_100g": 12
+            }
+        ],
+        "fruits": [
+            {
+                "name": "Guavas, common, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Guavas)",
+                "energy_kcal": 68,
+                "proteins_100g": 2.55
+            },
+            {
+                "name": "Guavas, strawberry, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Guavas)",
+                "energy_kcal": 69,
+                "proteins_100g": 0.58
+            }
+        ],
+        "nuts_seeds": [
+            {
+                "name": "Nuts, almonds",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 579,
+                "proteins_100g": 21.2
+            },
+            {
+                "name": "Nuts, almonds, blanched",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 590,
+                "proteins_100g": 21.4
+            },
+            {
+                "name": "Nuts, almonds, oil roasted, lightly salted",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 607,
+                "proteins_100g": 21.2
+            },
+            {
+                "name": "Nuts, almonds, oil roasted, with salt added",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 607,
+                "proteins_100g": 21.2
+            },
+            {
+                "name": "Nuts, almonds, whole, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 584,
+                "proteins_100g": 21.5
+            },
+            {
+                "name": "Nuts, cashew nuts, oil roasted, with salt added",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 581,
+                "proteins_100g": 16.8
+            },
+            {
+                "name": "Nuts, cashew nuts, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 533,
+                "proteins_100g": 17.4
+            },
+            {
+                "name": "Nuts, cashew nuts, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Nuts)",
+                "energy_kcal": 553,
+                "proteins_100g": 18.2
+            },
+            {
+                "name": "Peanuts, all types, dry-roasted, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 587,
+                "proteins_100g": 24.4
+            },
+            {
+                "name": "Peanuts, all types, oil-roasted, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 599,
+                "proteins_100g": 28
+            },
+            {
+                "name": "Peanuts, all types, oil-roasted, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 599,
+                "proteins_100g": 28
+            },
+            {
+                "name": "Peanuts, all types, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 567,
+                "proteins_100g": 25.8
+            },
+            {
+                "name": "Peanuts, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 551,
+                "proteins_100g": 23.2
+            },
+            {
+                "name": "Peanuts, spanish, oil-roasted, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 579,
+                "proteins_100g": 28
+            },
+            {
+                "name": "Peanuts, spanish, oil-roasted, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 579,
+                "proteins_100g": 28
+            },
+            {
+                "name": "Peanuts, valencia, oil-roasted, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 589,
+                "proteins_100g": 27
+            },
+            {
+                "name": "Peanuts, valencia, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 570,
+                "proteins_100g": 25.1
+            },
+            {
+                "name": "Peanuts, virginia, oil-roasted, with salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 578,
+                "proteins_100g": 25.9
+            },
+            {
+                "name": "Peanuts, virginia, oil-roasted, without salt",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 578,
+                "proteins_100g": 25.9
+            },
+            {
+                "name": "Peanuts, virginia, raw",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Peanuts)",
+                "energy_kcal": 563,
+                "proteins_100g": 25.2
+            }
+        ],
+        "spices": [
+            {
+                "name": "Spices, bay leaf",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 313,
+                "proteins_100g": 7.61
+            },
+            {
+                "name": "Spices, cinnamon, ground",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 247,
+                "proteins_100g": 3.99
+            },
+            {
+                "name": "Spices, dill weed, dried",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 253,
+                "proteins_100g": 20
+            },
+            {
+                "name": "Spices, fenugreek seed",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 323,
+                "proteins_100g": 23
+            },
+            {
+                "name": "Spices, garlic powder",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 331,
+                "proteins_100g": 16.6
+            },
+            {
+                "name": "Spices, ginger, ground",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 335,
+                "proteins_100g": 8.98
+            },
+            {
+                "name": "Spices, mustard seed, ground",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 508,
+                "proteins_100g": 26.1
+            },
+            {
+                "name": "Spices, parsley, dried",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 292,
+                "proteins_100g": 26.6
+            },
+            {
+                "name": "Spices, poppy seed",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 525,
+                "proteins_100g": 18
+            },
+            {
+                "name": "Spices, saffron",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 310,
+                "proteins_100g": 11.4
+            },
+            {
+                "name": "Spices, savory, ground",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 272,
+                "proteins_100g": 6.73
+            },
+            {
+                "name": "Spices, tarragon, dried",
+                "eligibility_status": "eligible",
+                "evidence": "indian_catalog.csv (staple_ingredient: Spices)",
+                "energy_kcal": 295,
+                "proteins_100g": 22.8
+            }
+        ]
+    },
+    "excluded_foods": [],
+    "recipes": [
+        {
+            "name": "Bajri no rotlo",
+            "ingredients": "Wheat flour, pearl millet flour, hot water",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 10,
+            "total_time": 20,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Wheat flour",
+                "pearl millet flour",
+                "hot water"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Chapati",
+            "ingredients": "Whole wheat flour, olive oil, hot water, all purpose flour",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 10,
+            "total_time": 20,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Whole wheat flour",
+                "olive oil",
+                "hot water",
+                "all purpose flour"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Keri no ras",
+            "ingredients": "Mango, sugar",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 10,
+            "total_time": 20,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "sour",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Mango",
+                "sugar"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Koshimbir",
+            "ingredients": "Cucumber, carrot, tomatoes, cilantro",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 10,
+            "total_time": 20,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Cucumber",
+                "carrot",
+                "tomatoes",
+                "cilantro"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Aloo tikki",
+            "ingredients": "Rice flour, potato, bread crumbs, garam masala, salt",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 5,
+            "cook_time": 20,
+            "total_time": 25,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Rice flour",
+                "potato",
+                "bread crumbs",
+                "garam masala",
+                "salt"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Dalithoy",
+            "ingredients": "Arhar dal, coconut oil, curry leaves, mustard seeds, red chilli",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 5,
+            "cook_time": 20,
+            "total_time": 25,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Arhar dal",
+                "coconut oil",
+                "curry leaves",
+                "mustard seeds",
+                "red chilli"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kootu",
+            "ingredients": "Chana dal, urad dal, potato, beans, peas",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 15,
+            "total_time": 25,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chana dal",
+                "urad dal",
+                "potato",
+                "beans",
+                "peas"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Aloo gobi",
+            "ingredients": "Cauliflower, potato, garam masala, turmeric, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Cauliflower",
+                "potato",
+                "garam masala",
+                "turmeric",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Currivepillai sadam ",
+            "ingredients": "Chana dal, urad dal, fresh coconut, sesame seeds, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chana dal",
+                "urad dal",
+                "fresh coconut",
+                "sesame seeds",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Gatta curry",
+            "ingredients": "Yogurt, besan, sauce, garam masala powder, gram flour",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Rajasthan",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Yogurt",
+                "besan",
+                "sauce",
+                "garam masala powder",
+                "gram flour"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Keerai sadam",
+            "ingredients": "Greens, tomato, mustard seeds, fenugreek seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Greens",
+                "tomato",
+                "mustard seeds",
+                "fenugreek seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Khar",
+            "ingredients": "Raw papaya, panch phoran masala, nigella seeds, mustard oil, fennel seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Assam",
+            "region": "North East",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Raw papaya",
+                "panch phoran masala",
+                "nigella seeds",
+                "mustard oil",
+                "fennel seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kos kootu",
+            "ingredients": "Moong dal, chana dal, cabbage, tamarind, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Moong dal",
+                "chana dal",
+                "cabbage",
+                "tamarind",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Koshambri",
+            "ingredients": "Moong dal, cucumber, curry leaves, green chili, lemon juice",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Karnataka",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Moong dal",
+                "cucumber",
+                "curry leaves",
+                "green chili",
+                "lemon juice"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kothamali sadam",
+            "ingredients": "Chana dal, urad dal, gooseberry, raw rice, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chana dal",
+                "urad dal",
+                "gooseberry",
+                "raw rice",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Lauki ki subji",
+            "ingredients": "Bottle gourd, coconut oil, garam masala, ginger, green chillies",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": null,
+            "region": null,
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Bottle gourd",
+                "coconut oil",
+                "garam masala",
+                "ginger",
+                "green chillies"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Pani Pitha",
+            "ingredients": "Tea leaves, white sesame seeds, dry coconut, soaked rice",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Assam",
+            "region": "North East",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Tea leaves",
+                "white sesame seeds",
+                "dry coconut",
+                "soaked rice"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Paniyaram",
+            "ingredients": "Yogurt, ginger, curry leaves, baking soda, green chilli",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Yogurt",
+                "ginger",
+                "curry leaves",
+                "baking soda",
+                "green chilli"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Paruppu sadam",
+            "ingredients": "Arhar dal, sambar powder, tomato, curry leaves, fennel seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Arhar dal",
+                "sambar powder",
+                "tomato",
+                "curry leaves",
+                "fennel seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Puli sadam",
+            "ingredients": "Urad dal, lemon, tamarind, cooked rice, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Urad dal",
+                "lemon",
+                "tamarind",
+                "cooked rice",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Sattu ki roti",
+            "ingredients": "Sattu, atta, dough, filling, mustard oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Bihar",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Sattu",
+                "atta",
+                "dough",
+                "filling",
+                "mustard oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Shukto",
+            "ingredients": "Green beans, bitter gourd, ridge gourd, banana, brinjal",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "West Bengal",
+            "region": "East",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Green beans",
+                "bitter gourd",
+                "ridge gourd",
+                "banana",
+                "brinjal"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Thayir sadam",
+            "ingredients": "Urad dal, curd, sesame oil, ginger, curry leaves, mustard seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 20,
+            "total_time": 30,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Urad dal",
+                "curd",
+                "sesame oil",
+                "ginger",
+                "curry leaves",
+                "mustard seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kuzhambu",
+            "ingredients": "Pearl onions, urad dal, drumsticks, tomato, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 5,
+            "cook_time": 30,
+            "total_time": 35,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Pearl onions",
+                "urad dal",
+                "drumsticks",
+                "tomato",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Pachadi",
+            "ingredients": "Coconut oil, cucumber, curd, curry leaves, mustard seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 25,
+            "total_time": 35,
+            "state": null,
+            "region": "South",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Coconut oil",
+                "cucumber",
+                "curd",
+                "curry leaves",
+                "mustard seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Theeyal",
+            "ingredients": "Coconut, whole red beans, masala, sesame oil, tamarind",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 15,
+            "cook_time": 20,
+            "total_time": 35,
+            "state": "Kerala",
+            "region": "South",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Coconut",
+                "whole red beans",
+                "masala",
+                "sesame oil",
+                "tamarind"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Zunka",
+            "ingredients": "Gram flour, mustard, garlic, turmeric, red chilli",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 25,
+            "total_time": 35,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Gram flour",
+                "mustard",
+                "garlic",
+                "turmeric",
+                "red chilli"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Bhatura",
+            "ingredients": "Chole, rava, yogurt, plain flour, baking soda",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 20,
+            "total_time": 40,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chole",
+                "rava",
+                "yogurt",
+                "plain flour",
+                "baking soda"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Brown Rice",
+            "ingredients": "Brown rice, soy sauce, olive oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 15,
+            "cook_time": 25,
+            "total_time": 40,
+            "state": null,
+            "region": null,
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Brown rice",
+                "soy sauce",
+                "olive oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Dal tadka",
+            "ingredients": "Pigeon peas, garam masala, ginger, red onion, kasuri methi",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Pigeon peas",
+                "garam masala",
+                "ginger",
+                "red onion",
+                "kasuri methi"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Jeera Aloo",
+            "ingredients": "Green chilies, lemon juice, chili powder, boiled potatoes",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Green chilies",
+                "lemon juice",
+                "chili powder",
+                "boiled potatoes"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Mishti Chholar Dal",
+            "ingredients": "Chana dal, fresh coconut, ginger, cinnamon, raisins",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "West Bengal",
+            "region": "East",
+            "flavor_profile": "sweet",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chana dal",
+                "fresh coconut",
+                "ginger",
+                "cinnamon",
+                "raisins"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Mushroom do pyaza",
+            "ingredients": "Mushroom, malai, garam masala, ginger, capsicum",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Mushroom",
+                "malai",
+                "garam masala",
+                "ginger",
+                "capsicum"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Mushroom matar",
+            "ingredients": "Canned coconut milk, frozen green peas, wild mushrooms, garam masala, tomatoes",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Canned coconut milk",
+                "frozen green peas",
+                "wild mushrooms",
+                "garam masala",
+                "tomatoes"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Pattor",
+            "ingredients": "Arbi ke patte, sesame seeds, gur, bengal gram flour, imli",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Rajasthan",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Arbi ke patte",
+                "sesame seeds",
+                "gur",
+                "bengal gram flour",
+                "imli"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Puri Bhaji",
+            "ingredients": "Aloo, urad dal, mustard, ginger, curry leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Aloo",
+                "urad dal",
+                "mustard",
+                "ginger",
+                "curry leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Rongi",
+            "ingredients": "Garam masala powder, tomato, kasuri methi, cinnamon, mustard oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Garam masala powder",
+                "tomato",
+                "kasuri methi",
+                "cinnamon",
+                "mustard oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Vegetable jalfrezi",
+            "ingredients": "Baby corn, french beans, garam masala, ginger, carrot",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 30,
+            "total_time": 40,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Baby corn",
+                "french beans",
+                "garam masala",
+                "ginger",
+                "carrot"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Aloo matar",
+            "ingredients": "Potato, peas, chillies, ginger, garam masala, garlic",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 5,
+            "cook_time": 40,
+            "total_time": 45,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Potato",
+                "peas",
+                "chillies",
+                "ginger",
+                "garam masala",
+                "garlic"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Bhakri",
+            "ingredients": "Jowar flour, sesame seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 25,
+            "total_time": 45,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Jowar flour",
+                "sesame seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Methi na Gota",
+            "ingredients": "Rava, gram flour, lemon juice, turmeric, fenugreek leaves",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 15,
+            "cook_time": 30,
+            "total_time": 45,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "bitter",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Rava",
+                "gram flour",
+                "lemon juice",
+                "turmeric",
+                "fenugreek leaves"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Rasam",
+            "ingredients": "Tomato, curry leaves, garlic, mustard seeds, hot water",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 35,
+            "total_time": 45,
+            "state": null,
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Tomato",
+                "curry leaves",
+                "garlic",
+                "mustard seeds",
+                "hot water"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Aloo methi",
+            "ingredients": "Potato, fenugreek leaves, chillies, salt, oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 40,
+            "total_time": 50,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "bitter",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Potato",
+                "fenugreek leaves",
+                "chillies",
+                "salt",
+                "oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Aloo shimla mirch",
+            "ingredients": "Potato, shimla mirch, garam masala, amchur powder, salt",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 40,
+            "total_time": 50,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Potato",
+                "shimla mirch",
+                "garam masala",
+                "amchur powder",
+                "salt"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Bhindi masala",
+            "ingredients": "Ladies finger, garam masala, kasuri methi, tomatoes, chili powder",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Ladies finger",
+                "garam masala",
+                "kasuri methi",
+                "tomatoes",
+                "chili powder"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Chana masala",
+            "ingredients": "Chickpeas, tomato paste, garam masala, ginger, red onion, avocado oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chickpeas",
+                "tomato paste",
+                "garam masala",
+                "ginger",
+                "red onion",
+                "avocado oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Chole bhature",
+            "ingredients": "Chole, bhatura, garam masala, bay leaf, cinnamon stick",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Chole",
+                "bhatura",
+                "garam masala",
+                "bay leaf",
+                "cinnamon stick"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Copra paak",
+            "ingredients": "Condensed milk, nestle cream, coconut ice, red food coloring, desiccated coconut",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Condensed milk",
+                "nestle cream",
+                "coconut ice",
+                "red food coloring",
+                "desiccated coconut"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Daal Dhokli",
+            "ingredients": "Whole wheat flour, dal, kokum, gur, bengal gram flour",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Whole wheat flour",
+                "dal",
+                "kokum",
+                "gur",
+                "bengal gram flour"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kadai paneer",
+            "ingredients": "Cottage cheese, bell peppers, gravy, garam masala, cashew nuts",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Cottage cheese",
+                "bell peppers",
+                "gravy",
+                "garam masala",
+                "cashew nuts"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kansar",
+            "ingredients": "Wheat flour, cashews, rapeseed oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 40,
+            "total_time": 50,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Wheat flour",
+                "cashews",
+                "rapeseed oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Keerai kootu",
+            "ingredients": "Moong dal, chana dal, spinach, urad dal, coconut oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Moong dal",
+                "chana dal",
+                "spinach",
+                "urad dal",
+                "coconut oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Keerai poriyal",
+            "ingredients": "Amaranth leaves, split urad dal, mustard seeds, grated coconut, red chili",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Tamil Nadu",
+            "region": "South",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Amaranth leaves",
+                "split urad dal",
+                "mustard seeds",
+                "grated coconut",
+                "red chili"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Laapsi",
+            "ingredients": "Cinnamon, jaggery, clarified butter, dry roasted",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 40,
+            "total_time": 50,
+            "state": "Madhya Pradesh",
+            "region": "Central",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Cinnamon",
+                "jaggery",
+                "clarified butter",
+                "dry roasted"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Luchi",
+            "ingredients": "Maida, vegetable oil",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "West Bengal",
+            "region": "East",
+            "flavor_profile": null,
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Maida",
+                "vegetable oil"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Sev khamani",
+            "ingredients": "Khaman, pomegranate, sev, powdered sugar, garlic",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Khaman",
+                "pomegranate",
+                "sev",
+                "powdered sugar",
+                "garlic"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Sev tameta",
+            "ingredients": "Sev, ginger, tomato, sugar",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Sev",
+                "ginger",
+                "tomato",
+                "sugar"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Veg Kolhapuri",
+            "ingredients": "Gobi, potato, beans, khus khus, coconut",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 30,
+            "total_time": 50,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Gobi",
+                "potato",
+                "beans",
+                "khus khus",
+                "coconut"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Amti",
+            "ingredients": "Kala masala, arhar dal, curry leaves, mustard seeds, hot water",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 10,
+            "cook_time": 45,
+            "total_time": 55,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Kala masala",
+                "arhar dal",
+                "curry leaves",
+                "mustard seeds",
+                "hot water"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Thalipeeth",
+            "ingredients": "Whole wheat flour, rice flour, pearl millet flour, sorghum flour, sesame seeds",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 25,
+            "cook_time": 30,
+            "total_time": 55,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Whole wheat flour",
+                "rice flour",
+                "pearl millet flour",
+                "sorghum flour",
+                "sesame seeds"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Daal puri",
+            "ingredients": "Moong dal, garam masala powder, garlic, green chilli, all purpose flour",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 30,
+            "cook_time": 30,
+            "total_time": 60,
+            "state": "West Bengal",
+            "region": "East",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Moong dal",
+                "garam masala powder",
+                "garlic",
+                "green chilli",
+                "all purpose flour"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Khichdi",
+            "ingredients": "Moong dal, green peas, ginger, tomato, green chili",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 40,
+            "cook_time": 20,
+            "total_time": 60,
+            "state": null,
+            "region": null,
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Moong dal",
+                "green peas",
+                "ginger",
+                "tomato",
+                "green chili"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Kofta",
+            "ingredients": "Paneer, potato, cream, corn flour, garam masala",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Uttar Pradesh",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Paneer",
+                "potato",
+                "cream",
+                "corn flour",
+                "garam masala"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Lauki ke kofte",
+            "ingredients": "Bottle gourd, garam masala powder, gram flour, ginger, chillies",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Uttar Pradesh",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Bottle gourd",
+                "garam masala powder",
+                "gram flour",
+                "ginger",
+                "chillies"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Misi roti",
+            "ingredients": "Whole wheat flour, chickpea flour, green chilies",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 30,
+            "cook_time": 30,
+            "total_time": 60,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Whole wheat flour",
+                "chickpea flour",
+                "green chilies"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Palak paneer",
+            "ingredients": "Cottage cheese, palak, cream, garam masala, butter",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Cottage cheese",
+                "palak",
+                "cream",
+                "garam masala",
+                "butter"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Paneer butter masala",
+            "ingredients": "Paneer, whipping cream, garam masala, cashew nuts, butter",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Paneer",
+                "whipping cream",
+                "garam masala",
+                "cashew nuts",
+                "butter"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Paneer tikka masala",
+            "ingredients": "Paneer, greek yogurt, tandoori masala, cream, bell pepper",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Paneer",
+                "greek yogurt",
+                "tandoori masala",
+                "cream",
+                "bell pepper"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Paratha",
+            "ingredients": "Wheat flour, butter, potato, coriander",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 15,
+            "cook_time": 45,
+            "total_time": 60,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Wheat flour",
+                "butter",
+                "potato",
+                "coriander"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Pav Bhaji",
+            "ingredients": "Pav bhaji masala, gobi, potatoes, green peas, dinner rolls",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Maharashtra",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Pav bhaji masala",
+                "gobi",
+                "potatoes",
+                "green peas",
+                "dinner rolls"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Saath",
+            "ingredients": "Urad dal, potatoes, wheat flour, sooji",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Gujarat",
+            "region": "West",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Urad dal",
+                "potatoes",
+                "wheat flour",
+                "sooji"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Shahi paneer",
+            "ingredients": "Cottage cheese, malai, garam masala, ginger, tomato",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 20,
+            "cook_time": 40,
+            "total_time": 60,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Cottage cheese",
+                "malai",
+                "garam masala",
+                "ginger",
+                "tomato"
+            ],
+            "unmatched_ingredients": [],
+            "ingredient_coverage": 1,
+            "explanation": "all checks resolved; no unknown tokens",
+            "warnings": []
+        },
+        {
+            "name": "Makki di roti sarson da saag",
+            "ingredients": "Palak, makki atta, mustard green, garam masala, ginger",
+            "course": "main course",
+            "diet": "vegetarian",
+            "prep_time": 25,
+            "cook_time": 30,
+            "total_time": 55,
+            "state": "Punjab",
+            "region": "North",
+            "flavor_profile": "spicy",
+            "compatibility_status": "compatible_with_known_preferences",
+            "matched_ingredients": [
+                "Palak",
+                "makki atta",
+                "garam masala",
+                "ginger"
+            ],
+            "unmatched_ingredients": [
+                "mustard green"
+            ],
+            "ingredient_coverage": 0.8,
+            "explanation": "all checks resolved; unknown tokens present but no allergy requested: ['mustard green']",
+            "warnings": []
+        }
+    ],
+    "recipes_needs_review": [],
+    "filtering_summary": {
+        "recipes_before_filtering": 255,
+        "recipes_after_diet_filter": 102,
+        "recipes_after_ingredient_checks": 102,
+        "recipes_needs_review": 0,
+        "recipes_excluded_by_time": 29,
+        "recipes_after_time_filter": 73
+    },
+    "warnings": [],
+    "items": [
+        {
+            "rank": 1,
+            "product_name": "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+            "food_type": "Other",
+            "brands": null,
+            "energy_kcal": 139,
+            "proteins_100g": 7.05,
+            "fat_100g": 2.77,
+            "carbs_100g": 22.5,
+            "sugars_100g": 4.01,
+            "fiber_100g": 6.4,
+            "sodium_100g": 0.246,
+            "health_score": 60,
+            "missing_nutrition": [],
+            "distance": 0.6857,
+            "why": "Selected by KNN closeness to the 'balanced' reference nutrient profile after filters (scaled Euclidean distance 0.686; closeness is not a suitability guarantee)",
+            "explanation": {
+                "source_dataset": "indian_catalog.csv (derived from healthy_foods_database.csv)",
+                "serving_basis": "per 100 g",
+                "cuisine_evidence": {
+                    "class": "staple_ingredient",
+                    "matched_term": "Chickpeas (garbanzo beans",
+                    "branded": false
+                },
+                "restrictions_checked": [],
+                "allergy_status": "not-checked",
+                "allergy_evidence": "No allergy requested, so no allergy check was performed.",
+                "rank_reason": "KNN rank #1 of 100 eligible foods: scaled Euclidean distance 0.6857 to the 'balanced' reference profile over energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+                "missing_fields": [],
+                "note": "Numerical closeness is not proof of suitability or safety; see allergy_status and missing_fields."
+            }
+        },
+        {
+            "rank": 2,
+            "product_name": "Peas and carrots, frozen, cooked, boiled, drained, with salt",
+            "food_type": "Vegetables",
+            "brands": null,
+            "energy_kcal": 201,
+            "proteins_100g": 3.09,
+            "fat_100g": 0.42,
+            "carbs_100g": 10.1,
+            "sugars_100g": 4.36,
+            "fiber_100g": 3.1,
+            "sodium_100g": 0.304,
+            "health_score": 60,
+            "missing_nutrition": [],
+            "distance": 0.9702,
+            "why": "Selected by KNN closeness to the 'balanced' reference nutrient profile after filters (scaled Euclidean distance 0.970; closeness is not a suitability guarantee)",
+            "explanation": {
+                "source_dataset": "indian_catalog.csv (derived from healthy_foods_database.csv)",
+                "serving_basis": "per 100 g",
+                "cuisine_evidence": {
+                    "class": "staple_ingredient",
+                    "matched_term": "Peas and carrots",
+                    "branded": false
+                },
+                "restrictions_checked": [],
+                "allergy_status": "not-checked",
+                "allergy_evidence": "No allergy requested, so no allergy check was performed.",
+                "rank_reason": "KNN rank #2 of 100 eligible foods: scaled Euclidean distance 0.9702 to the 'balanced' reference profile over energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+                "missing_fields": [],
+                "note": "Numerical closeness is not proof of suitability or safety; see allergy_status and missing_fields."
+            }
+        }
+    ]
+}

@@ -1,0 +1,156 @@
+{
+  "catalog": {
+    "file": "indian_catalog.csv",
+    "rows": 100,
+    "dishes": 9,
+    "staples": 91
+  },
+  "catalog_mean_kcal": 320.5,
+  "catalog_mean_protein": 12.09,
+  "profiles": {
+    "weight_loss_no_allergy": {
+      "catalog": "indian",
+      "n_items": 10,
+      "outside_catalog": [],
+      "mean_kcal": 90.5,
+      "mean_protein": 4.54,
+      "missing_nutrition_cells": 4,
+      "restriction_violations": 0,
+      "names": [
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, solids and liquids, low sodium",
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+        "Lentils, mature seeds, cooked, boiled, without salt",
+        "Peas and onions, frozen, unprepared",
+        "Potatoes, boiled, cooked in skin, skin, with salt"
+      ],
+      "evidence": [
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient"
+      ],
+      "filter_notes": [],
+      "unmet": null
+    },
+    "muscle_gain": {
+      "catalog": "indian",
+      "n_items": 10,
+      "outside_catalog": [],
+      "mean_kcal": 290.1,
+      "mean_protein": 14.85,
+      "missing_nutrition_cells": 7,
+      "restriction_violations": 0,
+      "names": [
+        "Spices, tarragon, dried",
+        "Bread, naan, whole wheat, commercially prepared, refrigerated",
+        "Spices, dill weed, dried",
+        "365 EVERYDAY VALUE, TANDOORI WHOLE WHEAT NAAN",
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids"
+      ],
+      "evidence": [
+        "staple_ingredient",
+        "indian_dish",
+        "staple_ingredient",
+        "indian_dish",
+        "staple_ingredient"
+      ],
+      "filter_notes": [],
+      "unmet": null
+    },
+    "balanced": {
+      "catalog": "indian",
+      "n_items": 10,
+      "outside_catalog": [],
+      "mean_kcal": 129.2,
+      "mean_protein": 4.25,
+      "missing_nutrition_cells": 4,
+      "restriction_violations": 0,
+      "names": [
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+        "Peas and carrots, frozen, cooked, boiled, drained, with salt",
+        "Tomatoes, sun-dried, packed in oil, drained",
+        "Potatoes, boiled, cooked in skin, skin, with salt",
+        "Cauliflower, green, cooked, with salt"
+      ],
+      "evidence": [
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient"
+      ],
+      "filter_notes": [],
+      "unmet": null
+    },
+    "peanut_allergy": {
+      "catalog": "indian",
+      "n_items": 0,
+      "outside_catalog": [],
+      "mean_kcal": null,
+      "mean_protein": null,
+      "missing_nutrition_cells": 0,
+      "restriction_violations": 0,
+      "names": [],
+      "evidence": [],
+      "filter_notes": [
+        {
+          "type": "allergy_unverifiable",
+          "value": "Peanuts",
+          "reason": "Catalog contains no allergen information: compatibility cannot be established and is never assumed."
+        }
+      ],
+      "unmet": "No foods satisfy all constraints; relax restrictions. Catalog contains no allergen information: compatibility cannot be established and is never assumed."
+    },
+    "low_sodium": {
+      "catalog": "indian",
+      "n_items": 10,
+      "outside_catalog": [],
+      "mean_kcal": 129.2,
+      "mean_protein": 4.25,
+      "missing_nutrition_cells": 4,
+      "restriction_violations": 0,
+      "names": [
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+        "Peas and carrots, frozen, cooked, boiled, drained, with salt",
+        "Tomatoes, sun-dried, packed in oil, drained",
+        "Potatoes, boiled, cooked in skin, skin, with salt",
+        "Cauliflower, green, cooked, with salt"
+      ],
+      "evidence": [
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient"
+      ],
+      "filter_notes": [],
+      "unmet": null
+    },
+    "low_sugar": {
+      "catalog": "indian",
+      "n_items": 10,
+      "outside_catalog": [],
+      "mean_kcal": 109.8,
+      "mean_protein": 5.0,
+      "missing_nutrition_cells": 0,
+      "restriction_violations": 0,
+      "names": [
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, solids and liquids, low sodium",
+        "Chickpeas (garbanzo beans, bengal gram), mature seeds, canned, drained solids",
+        "Lentils, mature seeds, cooked, boiled, without salt",
+        "Spinach, frozen, chopped or leaf, cooked, boiled, drained, without salt",
+        "Spinach, frozen, chopped or leaf, cooked, boiled, drained, with salt"
+      ],
+      "evidence": [
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient",
+        "staple_ingredient"
+      ],
+      "filter_notes": [],
+      "unmet": null
+    }
+  }
+}

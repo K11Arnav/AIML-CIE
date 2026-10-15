@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Node
+node_modules/
+frontend/dist/
+
+# Env / secrets (copy from .env.example instead)
+backend/.env
+frontend/.env
+
+# Logs
+*.log
+
+# Large files: NOT committed (GitHub 100 MB limit; clone stays light).
+# Diet/food path works from committed small artifacts. For workouts, place the
+# programs file in datasets/ (see README "Large files" section).
+artifacts/workout_catalog.csv
+datasets/programs_detailed_boostcamp_kaggle.csv
+data/archive_unused/

@@ -1,0 +1,9 @@
+# Python deps (model training + ML service). Node deps live in backend/ and frontend/.
+pandas>=2.0
+scikit-learn>=1.3
+numpy>=1.24
+joblib>=1.3
+pytest>=7.0
+fastapi>=0.100
+uvicorn>=0.20
+httpx>=0.24
