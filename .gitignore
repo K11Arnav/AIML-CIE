@@ -21,3 +21,4 @@ artifacts/workout_catalog.csv
 datasets/programs_detailed_boostcamp_kaggle.csv
 data/archive_unused/
 .venv/
+notebooks/.ipynb_checkpoints/
