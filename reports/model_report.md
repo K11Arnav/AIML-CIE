@@ -36,14 +36,23 @@ Retired references (no longer exist in the repo, never loaded): `programs_detail
   `energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g,
   sodium_100g`; query vectors are the documented goal reference profiles
   (ml/config.py `GOAL_NUTRITION_TARGETS`).
-- **No allergen columns ship with Anuvaad** → flags are DERIVED from food
+- **No allergen or diet tags ship with Anuvaad** → flags are DERIVED from food
   names by explicit keyword rules (`ml/allergens.py`, Indian/English/French
   vocabulary, exceptions such as coconut/soy/almond milk and "eggless",
-  optional plural suffixes). At the current retrain 425/1,014 foods carry ≥1
-  flag (gluten 214, dairy 167, eggs 41, fish 23, peanuts 15, nuts 12,
+  optional plural suffixes). At the current retrain 426/1,014 foods carry ≥1
+  allergen flag (gluten 214, dairy 168, eggs 41, fish 23, peanuts 15, nuts 12,
   soy 10). Flagged foods are excluded from KNN ranking and meal suggestions
-  are screened the same way. "Not flagged" is never a certified
-  allergen-free guarantee; every allergy-filtered response repeats this.
+  are screened the same way (allergen flags AND the requested diet
+  preference). "Not flagged" is never a certified allergen-free guarantee;
+  every filtered response repeats this.
+- **Diet-preference screening (same name-keyword approach):** vegetarian
+  excludes foods whose names carry fish/egg/meat keywords — 136/1,014
+  catalog foods; vegan additionally excludes dairy and honey — 300/1,014.
+  Ambiguous dishes with many vegetarian variants (kofta, korma, tikka) are
+  NOT excluded; unambiguous meat dishes without generic meat words
+  (Roghan josh, gosht, nihari, haleem, paye, nargisi kofta, gushtaba) are
+  explicitly flagged. Screening is computed at request time from catalog
+  names, counted per response in `preference_screening`.
 
 ### 4. Plan layout — `ml/plan_layout.py`
 The model predicts plan NAMES only. The layout into day-by-day exercises:

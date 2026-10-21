@@ -112,7 +112,7 @@ ankle, shoulder, back. Dropdowns are fed live from `GET /api/options/unified`
 ## Tests
 
 ```bash
-.venv/bin/python -m pytest tests/ -q   # 61 tests: model-driven workout/diet, layout, prep, unified, service routes
+.venv/bin/python -m pytest tests/ -q   # 105 tests: allergen+preference screening, workout/diet, layout, prep, unified, service routes
 cd backend && npm test                 # 12 tests: validation, forwarding, options, timeout-safe errors
 cd frontend && npm run build           # verifies the React app compiles
 ```
@@ -231,8 +231,10 @@ regenerate with `python -m ml.train` into `reports/metrics/*.json` and
   "Weight Maintenance" folded into "Maintenance"): profile → calorie target +
   macros + meal suggestion strings. Diet regressor training data + meal source.
 - `Anuvaad_INDB_2024.11.xlsx` (1,014 Indian foods × 82 columns, per-100 g):
-  KNN food-ranking catalog. Allergen flags derived from names by keyword
-  rules (`ml/allergens.py`): 425/1,014 foods carry ≥1 flag at retrain time.
+  KNN food-ranking catalog. Allergen and diet-compatibility tags derived from
+  names by keyword rules (`ml/allergens.py`): 426/1,014 foods carry ≥1
+  allergen flag (gluten 214, dairy 168, eggs 41, fish 23, peanuts 15, nuts
+  12, soy 10); 136 foods are excluded for vegetarians, 300 for vegans.
 - `exercises.json` (1,324 exercises: equipment/body_part/instructions): plan →
   exercise layout library (`ml/plan_layout.py`).
 - `program_summary.csv` — **retired**, not part of any pipeline (old boostcamp
@@ -244,9 +246,10 @@ Retired references that no longer exist anywhere (code, configs, or reports):
 
 ## Layout
 
-`ml/` — `config.py`, `data_preparation.py`, `plan_layout.py`, `train.py`,
-`evaluation.py`, `recommender.py`, `unified.py`, `options.py`, `calories.py`;
-`ml_service/` — FastAPI wrapper; `backend/` — Express proxy + validation;
-`frontend/` — React single-form app; `tests/` — 61 fixture-based pytest tests;
-`artifacts/` — committed models + catalogs (rebuildable, reproducible);
-`reports/` — `model_report.md`, `sample_unified_response.json`, `metrics/`.
+`ml/` — `config.py`, `allergens.py`, `data_preparation.py`, `plan_layout.py`,
+`train.py`, `evaluation.py`, `recommender.py`, `unified.py`, `options.py`,
+`calories.py`; `ml_service/` — FastAPI wrapper; `backend/` — Express proxy +
+validation; `frontend/` — React single-form app; `tests/` — 105 fixture-based
+pytest tests; `artifacts/` — committed models + catalogs (rebuildable,
+reproducible); `reports/` — `model_report.md`, `sample_unified_response.json`,
+`metrics/`.
