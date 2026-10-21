@@ -190,9 +190,13 @@ def main() -> None:
         "workout_metrics": workout_metrics,
         "diet_metrics": diet_metrics,
         "values": survey,
-        "allergen_policy": ("The Anuvaad food DB has NO allergen flags: any "
-                            "requested allergy fails closed (all foods excluded "
-                            "with a warning). Compatibility is never assumed."),
+        "allergen_policy": ("The Anuvaad INDB ships no allergen columns, so "
+                            "flags are DERIVED from food names by keyword rules "
+                            "(ml/allergens.py), stored as boolean columns in "
+                            "food_catalog.csv and applied to both KNN food "
+                            "ranking and meal-suggestion screening. Positive "
+                            "keyword matches are excluded; 'not flagged' is "
+                            "never a certified allergen-free guarantee."),
         "notes": [
             "Trained ONLY from the five datasets/ files present now; the old "
             "boostcamp program catalog, diet_recommendations_dataset.csv, "

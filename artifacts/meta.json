@@ -25,7 +25,16 @@
       "rows_before": 1014,
       "exact_dupes_removed": 0,
       "n_outliers_excluded": 0,
-      "rows_after": 1014
+      "rows_after": 1014,
+      "allergen_flag_counts": {
+        "contains_gluten": 214,
+        "contains_dairy": 168,
+        "contains_nuts": 12,
+        "contains_peanuts": 15,
+        "contains_soy": 10,
+        "contains_eggs": 41,
+        "contains_fish": 23
+      }
     },
     "exercise_library.json": {
       "source": "exercises.json",
@@ -969,7 +978,7 @@
       ]
     }
   },
-  "allergen_policy": "The Anuvaad food DB has NO allergen flags: any requested allergy fails closed (all foods excluded with a warning). Compatibility is never assumed.",
+  "allergen_policy": "The Anuvaad INDB ships no allergen columns, so flags are DERIVED from food names by keyword rules (ml/allergens.py), stored as boolean columns in food_catalog.csv and applied to both KNN food ranking and meal-suggestion screening. Positive keyword matches are excluded; 'not flagged' is never a certified allergen-free guarantee.",
   "notes": [
     "Trained ONLY from the five datasets/ files present now; the old boostcamp program catalog, diet_recommendations_dataset.csv, healthy_foods_database.csv and indian_food.csv are retired.",
     "Compact RFs (80 trees, max_depth 12) chosen deliberately: test metrics identical to larger configs with ~10x smaller artifacts.",

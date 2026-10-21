@@ -5,6 +5,8 @@ Every model here is trained ONLY from the five current datasets/ files:
   workout  RF classifier on smartfit_workout_dataset.csv (8 profile features)
   diet     RF regressor on nutrition_dataset.csv (profile -> macros)
   foods    KNN over Anuvaad_INDB_2024.11.xlsx per-100g catalog
+Allergen compatibility comes from ml/allergens.py keyword rules applied to
+food and meal-suggestion names (the Anuvaad INDB ships no allergen columns).
 The retired boostcamp program catalog is no longer referenced anywhere.
 """
 import json
@@ -15,6 +17,7 @@ import pandas as pd
 
 from .config import (ALLERGY_TO_FLAG, ARTIFACTS_DIR, GOAL_ALIASES,
                      GOAL_NUTRITION_TARGETS, WORKOUT_INJURY_VALUES)
+from . import allergens as AL
 from . import plan_layout as PL
 from .plan_layout import (DEFAULT_DAYS_PER_WEEK, plan_layout)
 
@@ -87,9 +90,10 @@ class FitnessRecommender:
                       "datasets/smartfit_workout_dataset.csv "
                       "(features: Age, Gender, Weight_kg, Height_cm, Goal, "
                       "Equipment, Experience, Injury -> Recommended_Plan)")
-    ALLERGEN_DATA_MSG = ("Food catalog (Anuvaad INDB) contains no allergen "
-                         "flags: compatibility cannot be established and is "
-                         "never assumed.")
+    ALLERGEN_DATA_MSG = ("Allergen flags are keyword-derived from Anuvaad food "
+                         "names (ml/allergens.py): positive matches are "
+                         "excluded, but 'not flagged' is not a certified "
+                         "allergen-free guarantee — verify labels.")
 
     def _workout_X(self, profile: dict) -> pd.DataFrame:
         feats = self._workout_model["features"]
@@ -269,19 +273,38 @@ class FitnessRecommender:
                            (self._meta.get("diet_metrics", {}).get("per_target", {})).items()},
                 }}
 
-    def _apply_allergy_failclosed(self, allergies, n_rows: int):
-        """No allergen flags exist in the Anuvaad catalog: fail closed."""
-        excluded, notes = [], []
-        if allergies:
-            for a in allergies:
-                key = _norm(a)
-                if key and not next((f for sub, f in ALLERGY_TO_FLAG.items()
-                                     if sub in key), None):
-                    notes.append({"type": "allergy_unmapped", "value": a,
-                                  "reason": "Label maps to no known flag; "
-                                            "regardless, the catalog has no allergen data."})
-            excluded = [{"type": "allergy_unverifiable", "n_rows": int(n_rows)}]
-        return excluded, notes
+    def _allergy_flags(self, allergies):
+        """Map user allergy labels -> derived allergen flags to filter on.
+
+        Unknown labels never silently filter nothing: they are reported in
+        notes/unmet. Returns (flags:set[str], notes:list, unmet:list).
+        """
+        notes, unmet, flags = [], [], set()
+        for a in allergies:
+            key = _norm(a)
+            hit = next((f for sub, f in ALLERGY_TO_FLAG.items()
+                        if sub in key), None)
+            if hit:
+                flags.add(hit)
+            else:
+                notes.append({"type": "allergy_unmapped", "value": a,
+                              "reason": "Label maps to no known allergen "
+                                        "flag; no filter was applied for it."})
+                unmet.append(f"allergy {a!r} is not mapped to a catalog "
+                             "flag — it was NOT screened")
+        return flags, notes, unmet
+
+    def _apply_allergy_filter(self, catalog: pd.DataFrame, flags: set):
+        """Drop catalog rows whose derived allergen flags intersect the
+        user's mapped allergies. Returns (filtered_catalog, excluded_count)."""
+        if not flags:
+            return catalog, 0
+        mask = pd.Series(False, index=catalog.index)
+        for flag in flags:
+            if flag in catalog.columns:
+                mask = mask | catalog[flag].astype(bool)
+        filtered = catalog[~mask].reset_index(drop=True)
+        return filtered, int(len(catalog) - len(filtered))
 
     def recommend_diet(self, profile: dict) -> dict:
         """Model-driven diet recommendation: predicted macros + KNN foods +
@@ -298,6 +321,7 @@ class FitnessRecommender:
                       if goal_key else None)
 
         macros = self.predict_diet_macros(profile)
+        flags, a_notes, a_unmet = self._allergy_flags(allergies)
         base = {
             "method": self.DIET_METHOD,
             "predicted": macros["targets"],
@@ -311,28 +335,51 @@ class FitnessRecommender:
                 "profile (no goal given)."),
             "meals_method": (
                 "Meal suggestions are retrieved from nutrition_dataset.csv rows "
-                "matching your dietary preference; none are generated or "
-                "validated for allergies."),
+                "matching your dietary preference, screened against the same "
+                "keyword-derived allergen rules; none are generated."),
             "catalog_used": {
                 "key": "food_catalog.csv (Anuvaad INDB per 100g)",
                 "rows": int(len(self._food)),
-                "allergen_data": False},
+                "allergen_data": True,
+                "allergen_method": (
+                    "Derived from food names by keyword rules in ml/allergens.py "
+                    "(positive matches only). 'Not flagged' is NOT a guarantee — "
+                    "verify ingredient labels.")},
             "version": self._meta.get("version")}
         if not target_vec:
             base["unmet"] = (base.get("unmet", []) +
                              [f"goal={goal!r}: unmapped for food ranking; used median profile"])
-        # --- KNN food ranking ---
-        catalog = self._food
-        n_before = int(len(catalog))
-        excluded, filter_notes = self._apply_allergy_failclosed(
-            allergies, n_before)
+        base["unmet"] = base.get("unmet", []) + a_unmet
+        # --- KNN food ranking (allergy-filtered) ---
+        catalog, items_excluded = self._apply_allergy_filter(self._food, flags)
+        n_before = int(len(self._food))
         if allergies:
+            base["filter_notes"] = ([n for n in a_notes] + (
+                [{"type": "allergy_filtered", "n_rows": items_excluded,
+                  "flags": sorted(flags)}] if items_excluded else []))
+        if catalog.empty:
             return {**base, "items": [],
-                    "excluded": excluded, "filter_notes": filter_notes,
-                    "allergen_warning": self.ALLERGEN_DATA_MSG,
-                    "unmet": (base.get("unmet", []) +
-                              ["No foods satisfy allergy constraints: catalog "
-                               "has no allergen data (fail-closed)."])}
+                    "allergen_warning": (
+                        "No foods remain after applying the mapped allergen "
+                        "flags " + (f"{sorted(flags)} " if flags else "") +
+                        "to keyword screening — no ranking is possible. "
+                        "Keyword rules flag positives only ('not flagged' is "
+                        "not a certified allergen-free guarantee)."),
+                    "excluded": [{"type": "allergy_excluded_all",
+                                  "n_rows": n_before}]}
+        if allergies:
+            base["allergy_screening"] = {
+                "allergies": allergies,
+                "flags_applied": sorted(flags),
+                "foods_excluded": items_excluded,
+                "foods_screened": n_before,
+                "basis": ("Keyword-derived allergen flags on Anuvaad food "
+                          "names (ml/allergens.py). Positive matches are "
+                          "excluded; the residual risk of unlisted "
+                          "ingredients remains — verify labels."),
+                "disclaimer": ("Keyword screening is NOT a medical guarantee. "
+                               "Cross-contamination and compound ingredients "
+                               "cannot be detected from names alone.")}
 
         bundle = self._knn.get("general", self._knn)
         cols = bundle["cols"]
@@ -357,19 +404,23 @@ class FitnessRecommender:
                 "sugars_100g": _f(r.get("sugars_100g")),
                 "fiber_100g": _f(r.get("fiber_100g")),
                 "sodium_100g": _f(r.get("sodium_100g")),
+                "allergen_flags": AL.flagged(
+                    {c: bool(r.get(c, False)) for c in AL.ALLERGEN_FLAGS}),
                 "missing_nutrition": missing,
                 "rank_reason": (f"KNN rank #{rank} of {len(catalog)} catalog "
                                 "foods over scaled per-100g columns "
                                 f"{', '.join(cols)}"),
                 "serving_basis": "per 100 g (Anuvaad INDB composition table)",
             })
-        base["filter_notes"] = filter_notes
-        # --- meal suggestions: retrieved, never generated ---
+        # --- meal suggestions: retrieved, screened against allergies ---
         meals = self._meal_suggestions(
-            profile, macros["targets"].get("Daily Calorie Target"))
+            profile, macros["targets"].get("Daily Calorie Target"), flags)
         return {**base, "items": items, "meals": meals}
 
-    def _meal_suggestions(self, profile: dict, predicted_calories: float | None) -> dict:
+    def _meal_suggestions(self, profile: dict, predicted_calories: float | None,
+                          allergy_flags: set) -> dict:
+        """Closest-calorie nutrition row; when allergies are mapped, prefer
+        the closest row whose suggestion texts screen clean (scan cap 60)."""
         pref = profile.get("dietary_preference")
         df = self._nutrition
         rows = df
@@ -377,27 +428,44 @@ class FitnessRecommender:
             rows = rows[rows["Dietary Preference"].str.casefold() == _norm(pref)]
         goal = profile.get("fitness_goal")
         by_goal = rows[rows["Fitness Goal"].str.casefold() == _norm(goal)] if goal else rows.head(0)
-        picked = None
+        ordered_pools = []
         if predicted_calories is not None:
             for pool in (by_goal, rows):
                 if pool.empty:
                     continue
                 diff = (pool["Daily Calorie Target"] - float(predicted_calories)).abs()
-                picked = pool.loc[[diff.idxmin()]]
+                ordered_pools.append(pool.loc[diff.sort_values().index])
+        if not ordered_pools:
+            ordered_pools = [rows] if not rows.empty else []
+        row, row_warnings = None, {}
+        for pool in ordered_pools:
+            if row is not None and not row_warnings:
                 break
-        if picked is None:
-            picked = rows.head(1) if not rows.empty else rows
-        row = picked.iloc[0] if not picked.empty else None
+            for idx in list(pool.index)[:60]:
+                cand = self._nutrition.loc[idx]
+                warnings = self._row_allergy_warnings(cand, allergy_flags)
+                if row is None:
+                    row, row_warnings = cand, warnings
+                if not warnings:
+                    row, row_warnings = cand, {}
+                    break
+            if row is not None and not row_warnings:
+                break
+        if row is None and not rows.empty:
+            row = rows.iloc[0]
         if row is None:
             return {"matches": 0, "day": None,
                     "note": "No matching rows in nutrition_dataset.csv."}
         by_goal_n = int(len(by_goal))
-        return {
+        out = {
             "matches": int(len(rows)),
             "goal_matched_rows": by_goal_n,
             "selection_basis": ("Row from nutrition_dataset.csv with the calorie "
-                                "target closest to the model prediction; "
-                                "retrieved suggestion, not generated."),
+                                "target closest to the model prediction"
+                                + ("; first candidate whose suggestions screen "
+                                   "clean against your mapped allergen flags"
+                                   if allergy_flags else "")
+                                + "; retrieved suggestion, not generated."),
             "row_context": {"Activity Level": row.get("Activity Level"),
                             "Fitness Goal": row.get("Fitness Goal"),
                             "Dietary Preference": row.get("Dietary Preference"),
@@ -406,7 +474,32 @@ class FitnessRecommender:
                             "Carbohydrates": _f(row.get("Carbohydrates")),
                             "Fat": _f(row.get("Fat"))},
             "suggestions": {slot: row.get(slot) for slot in MEAL_SLOTS},
+            "allergy_screening": {
+                "screened": bool(allergy_flags),
+                "basis": "keyword-derived allergen rules (ml/allergens.py) "
+                         "applied to the suggestion texts"
+                if allergy_flags else "no mapped allergies — not screened",
+                "warnings": row_warnings,
+            },
         }
+        return out
+
+    @staticmethod
+    def _row_allergy_warnings(row: pd.Series, flags: set) -> dict:
+        """{slot: [flag,...]} for every meal-suggestion text that trips a
+        mapped allergen flag; empty dict when the row screens clean."""
+        if not flags:
+            return {}
+        warnings = {}
+        for slot in MEAL_SLOTS:
+            text = row.get(slot)
+            if text is None or (isinstance(text, float) and pd.isna(text)):
+                continue
+            hit = AL.flagged({f: (v and f in flags)
+                              for f, v in AL.screen_text(str(text)).items()})
+            if hit:
+                warnings[slot] = hit
+        return warnings
 
 
 def _goal_values(meta: dict) -> set:

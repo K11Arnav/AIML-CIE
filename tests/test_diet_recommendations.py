@@ -36,9 +36,10 @@ def test_recommend_diet_knn_items_ranked(rec, tmp_path):
     out = jsonable(rec.recommend_diet(DIET_PROFILE), tmp_path)
     ranks = [i["rank"] for i in out["items"]]
     assert ranks == sorted(ranks) and len(ranks) <= 5
-    assert out["items"][0]["product_name"].startswith("test food")
+    assert out["items"][0]["product_name"] is not None
+    assert isinstance(out["items"][0]["allergen_flags"], list)
     assert "method" in out and "RandomForest" in out["method"]
-    assert out["catalog_used"]["allergen_data"] is False
+    assert out["catalog_used"]["allergen_data"] is True
 
 
 def test_goal_entered_via_reference_profile(rec, tmp_path):
@@ -51,11 +52,39 @@ def test_goal_entered_via_reference_profile(rec, tmp_path):
     assert "unmet" in without_goal and names_goal != names_median
 
 
-def test_allergies_fail_closed(rec):
+def test_allergies_screened_not_fail_closed(rec):
+    """Allergen flags (keyword-derived) now filter the ranking instead of
+    returning an empty list."""
     out = rec.recommend_diet({**DIET_PROFILE, "allergies": ["Peanuts"]})
-    assert out["items"] == []
-    assert "fail-closed" in " ".join(out["unmet"])
-    assert out["catalog_used"]["allergen_data"] is False
+    screening = out["allergy_screening"]
+    assert screening["allergies"] == ["Peanuts"]
+    assert screening["flags_applied"] == ["contains_peanuts"]
+    assert screening["foods_excluded"] == 1  # 'peanut chikki bar'
+    assert "peanut" not in " ".join(i["product_name"] or "" for i in out["items"]).lower()
+    for item in out["items"]:
+        assert "contains_peanuts" not in item["allergen_flags"]
+
+
+def test_dairy_allergy_excludes_paneer(rec):
+    out = rec.recommend_diet({**DIET_PROFILE, "allergies": ["Dairy"]})
+    names = " ".join(i["product_name"] or "" for i in out["items"]).lower()
+    assert "paneer" not in names
+    assert "contains_dairy" not in [f for i in out["items"] for f in i["allergen_flags"]]
+
+
+def test_meals_screened_when_allergies_mapped(rec):
+    out = rec.recommend_diet({**DIET_PROFILE, "allergies": ["Peanuts"]})
+    ms = out["meals"]["allergy_screening"]
+    assert ms["screened"] is True
+    assert ms["basis"] and "keyword" in ms["basis"]
+    assert isinstance(ms["warnings"], dict)
+
+
+def test_unknown_allergy_reported_not_silent(rec):
+    out = rec.recommend_diet({**DIET_PROFILE, "allergies": ["Dragon dander"]})
+    assert any("Dragon dander" in u for u in out["unmet"])
+    assert any(n["type"] == "allergy_unmapped"
+               for n in out.get("filter_notes", []))
 
 
 def test_meals_retrieved_not_generated(rec):
@@ -76,7 +105,8 @@ def test_meals_respect_dietary_preference(rec):
 
 
 def test_any_preference_selects_all_rows(rec):
-    out = rec._meal_suggestions({**DIET_PROFILE, "dietary_preference": "any"}, 2000)
+    out = rec._meal_suggestions(
+        {**DIET_PROFILE, "dietary_preference": "any"}, 2000, set())
     # fixture has all three preferences
     assert out["row_context"]["Dietary Preference"] in {"Omnivore", "Vegetarian", "Vegan"}
 

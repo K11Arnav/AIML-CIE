@@ -13,7 +13,8 @@ Every field the frontend sends is consumed below (no dead fields):
   injuries_or_limitations            -> workout RF Injury feature + safety note
   activity_level                     -> diet RF feature (+ formula context)
   dietary_preference                 -> diet RF feature + meal retrieval
-  allergies                          -> food ranking fail-closed exclusion
+  allergies                          -> allergen-flag filtering of the food
+                                        ranking + meal-suggestion screening
 
 Values below are the EXACT training values from the current datasets
 (smartfit goals/equipment/levels; nutrition activity levels/preferences).

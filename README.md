@@ -53,10 +53,13 @@ the website gets results over HTTP.
 2. **Diet:** an RF regressor (`nutrition_dataset.csv`: Age, Gender, Height,
    Weight, Activity Level, Fitness Goal, Dietary Preference) predicts the daily
    calorie target + protein/carbs/fat. Meal suggestions are retrieved rows from
-   the same dataset (never generated, not allergy-screened).
+   the same dataset, screened against your mapped allergies.
 3. **Foods:** KNN ranks the `Anuvaad_INDB` per-100 g catalog against a goal
-   reference nutrient profile. The Anuvaad catalog has NO allergen flags, so a
-   requested allergy fails closed (all foods excluded + warning).
+   reference nutrient profile. The Anuvaad catalog ships no allergen columns,
+   so allergen flags are DERIVED from food names by explicit keyword rules
+   (`ml/allergens.py`, unit-tested): any flagged food is excluded from the
+   ranking and meal text. "Not flagged" is never claimed to be certified
+   allergen-free — every allergy-filtered response carries this caveat.
 
 So: two small RF models + one KNN bundle + one deterministic layout table —
 every number traceable to a dataset or a documented constant.
@@ -83,7 +86,7 @@ every field you send is consumed by a model:
 | `workout_days_per_week` | optional | weekly split (default 4, reported) |
 | `injuries_or_limitations` | optional | workout RF `Injury` feature + safety warning |
 | `dietary_preference` | optional | diet RF feature + meal retrieval |
-| `allergies` | optional | food ranking fail-closed exclusion |
+| `allergies` | optional | keyword-derived allergen-flag filtering (food ranking + meal screening) |
 
 Goal values (exact training vocabulary): Weight Loss, Muscle Gain, General
 Health, Strength, Endurance, Tone Up, Powerlifting, Flexibility, CrossFit,
@@ -195,7 +198,7 @@ diet = rec.recommend_diet({
     "fitness_goal": "Weight Loss",
     "dietary_preference": "Omnivore",  # Omnivore/Vegetarian/Vegan
     "goal": "weight loss",             # KNN reference profile key
-    "allergies": [],                   # any allergy -> fail-closed empty + warning
+    "allergies": [],                   # mapped labels -> keyword-derived flag filtering
     "top_k": 5,
 })
 ```
@@ -226,7 +229,8 @@ regenerate with `python -m ml.train` into `reports/metrics/*.json` and
   "Weight Maintenance" folded into "Maintenance"): profile → calorie target +
   macros + meal suggestion strings. Diet regressor training data + meal source.
 - `Anuvaad_INDB_2024.11.xlsx` (1,014 Indian foods × 82 columns, per-100 g):
-  KNN food-ranking catalog. No allergen flags → allergies fail closed.
+  KNN food-ranking catalog. Allergen flags derived from names by keyword
+  rules (`ml/allergens.py`): 425/1,014 foods carry ≥1 flag at retrain time.
 - `exercises.json` (1,324 exercises: equipment/body_part/instructions): plan →
   exercise layout library (`ml/plan_layout.py`).
 - `program_summary.csv` — **retired**, not part of any pipeline (old boostcamp

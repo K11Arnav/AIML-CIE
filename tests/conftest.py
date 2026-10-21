@@ -12,6 +12,8 @@ import pytest
 
 from ml.train import fit_knn, train_diet_regressor, train_workout_classifier
 from ml.data_preparation import load_exercise_library
+from ml.config import ALLERGEN_FLAG_COLS
+from ml.allergens import derive_allergens
 from ml.recommender import FitnessRecommender
 
 rng = np.random.default_rng(0)
@@ -84,11 +86,16 @@ def nutrition_frame_fixture(n=120, seed=2):
 
 
 def food_frame_fixture(n=24, seed=3):
-    """Anuvaad-schema fixture (canonical per-100g columns after the adapter)."""
+    """Anuvaad-schema fixture (canonical per-100g columns + derived allergen
+    flags via the real keyword rules)."""
     r = np.random.default_rng(seed)
+    names = [f"test food {i}" for i in range(n)]
+    names[1] = "peanut chikki bar"
+    names[2] = "paneer curry"
+    names[3] = "wheat bread slice"
     df = pd.DataFrame({
         "food_code": [f"F{i:04d}" for i in range(n)],
-        "product_name": [f"test food {i}" for i in range(n)],
+        "product_name": names,
         "energy_kj": r.uniform(50, 2000, n),
         "energy_kcal": r.uniform(20, 400, n),
         "proteins_100g": r.uniform(0, 25, n),
@@ -99,6 +106,10 @@ def food_frame_fixture(n=24, seed=3):
         "sodium_100g": r.uniform(0.01, 0.6, n),
     })
     df.loc[0, "sugars_100g"] = np.nan  # missing nutrition must be reported, not zeroed
+    flags = pd.DataFrame([derive_allergens(nm) for nm in names],
+                         index=df.index)
+    for c in ALLERGEN_FLAG_COLS:
+        df[c] = flags[c].astype(bool)
     return df
 
 

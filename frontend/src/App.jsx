@@ -53,7 +53,7 @@ function MultiSelect({ legend, options, selected, onChange }) {
   );
 }
 
-const ALLERGIES = ["Gluten", "Peanuts", "Dairy", "Soy", "Eggs", "Fish"];
+const ALLERGIES = ["Gluten", "Peanuts", "Dairy", "Tree nuts", "Soy", "Eggs", "Fish / seafood"];
 
 export default function App() {
   const [health, setHealth] = useState({ state: "loading" });
@@ -109,13 +109,13 @@ export default function App() {
     { value: "gym membership", label: "Gym membership (machines, cables, barbell)" },
     { value: "yoga mat", label: "Yoga mat (mobility, floor work)" },
   ]).map((o) => ({ value: o.value, label: o.label || o.value }));
-  const goalOpts = (opts.data.goals || ["Weight Loss", "Muscle Gain", "General Health"])
+  const goalOpts = (opts.data?.goals || ["Weight Loss", "Muscle Gain", "General Health"])
     .map((v) => ({ value: v, label: v }));
-  const actOpts = (opts.data.activity_levels || ["sedentary", "lightly active", "moderately active", "very active"])
+  const actOpts = (opts.data?.activity_levels || ["sedentary", "lightly active", "moderately active", "very active"])
     .map((v) => ({ value: v, label: v.replace(/\b\w/g, (c) => c.toUpperCase()) }));
-  const injOpts = (opts.data.injuries || ["none", "knee", "ankle", "shoulder", "back"])
+  const injOpts = (opts.data?.injuries || ["none", "knee", "ankle", "shoulder", "back"])
     .map((v) => ({ value: v, label: v === "none" ? "None" : v.replace(/\b\w/g, (c) => c.toUpperCase()) }));
-  const prefOpts = (opts.data.dietary_preferences || ["any", "omnivore", "vegetarian", "vegan"])
+  const prefOpts = (opts.data?.dietary_preferences || ["any", "omnivore", "vegetarian", "vegan"])
     .map((v) => ({ value: v, label: v === "any" ? "Any" : v.replace(/\b\w/g, (c) => c.toUpperCase()) }));
 
   return (
@@ -163,7 +163,7 @@ export default function App() {
             </div>
             <div className="full"><button type="submit">Get diet + workout recommendations</button></div>
           </form>
-          <p className="meta">Note: {opts.data.safety_note}</p>
+          {opts.data?.safety_note && <p className="meta">Note: {opts.data.safety_note}</p>}
           <Result state={res} render={(data) => <UnifiedResults data={data} />} />
         </section>
       )}
@@ -192,7 +192,7 @@ function UnifiedResults({ data }) {
       {allergyNote && <p className="warn">{allergyNote}</p>}
       {diet.meals && <MealsCard meals={diet.meals} />}
       <h3>Foods ranked for your goal ({data.diet_goal})</h3>
-      {(diet.items || []).length === 0 && <p>No matching foods (check allergy warnings above).</p>}
+      {(diet.items || []).length === 0 && <p>No matching foods (check allergy screening above).</p>}
       {(diet.items || []).map((item) => <FoodCard key={item.rank + (item.product_name || "")} item={item} />)}
     </div>
   );
@@ -229,7 +229,7 @@ function MealsCard({ meals }) {
         ))}
       </ul>
       <p className="meta">Row context: {MealsCard.ctx(meals)}</p>
-      <p className="meta">Suggestions are not allergy-screened — verify ingredients yourself.</p>
+      <p className="meta">Suggestions allergen-screened against keyword-derived flags (ml/allergens.py) — verify ingredient labels yourself.</p>
     </div>
   );
 }

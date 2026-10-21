@@ -43,18 +43,26 @@ KNN_NUTRITION_COLS = [
     "fiber_100g", "proteins_100g", "sodium_100g",
 ]
 
-# Allergy label -> flag mapping. Kept for label parsing only: the Anuvaad food
-# DB has NO allergen flags, so any requested allergy fails closed (excluded
-# with a warning) — compatibility is never assumed.
+# Allergen flags are DERIVED from food names by keyword rules in
+# ml/allergens.py (the Anuvaad INDB ships nutrients only). Flags are positive
+# matches only; "not flagged" is never claimed to be certified allergen-free.
 ALLERGEN_FLAG_COLS = [
-    "contains_gluten", "contains_dairy", "contains_nuts",
+    "contains_gluten", "contains_dairy", "contains_nuts", "contains_peanuts",
     "contains_soy", "contains_eggs", "contains_fish",
 ]
 ALLERGY_TO_FLAG = {
-    "gluten": "contains_gluten", "wheat": "contains_gluten",
+    "gluten": "contains_gluten", "wheat": "contains_gluten", "celiac": "contains_gluten",
     "dairy": "contains_dairy", "milk": "contains_dairy", "lactose": "contains_dairy",
-    "peanut": "contains_nuts", "nut": "contains_nuts",
-    "soy": "contains_soy", "egg": "contains_eggs", "fish": "contains_fish",
+    "peanut": "contains_peanuts", "peanuts": "contains_peanuts",
+    "groundnut": "contains_peanuts", "arachide": "contains_peanuts",
+    "nut": "contains_nuts", "nuts": "contains_nuts", "tree nut": "contains_nuts",
+    "almond": "contains_nuts", "cashew": "contains_nuts", "hazelnut": "contains_nuts",
+    "walnut": "contains_nuts", "pistachio": "contains_nuts",
+    "soy": "contains_soy", "soya": "contains_soy", "soybean": "contains_soy",
+    "egg": "contains_eggs", "eggs": "contains_eggs",
+    "fish": "contains_fish", "seafood": "contains_fish",
+    "shellfish": "contains_fish", "shell fish": "contains_fish",
+    "prawn": "contains_fish", "shrimp": "contains_fish", "crab": "contains_fish",
 }
 
 # Explicit goal -> target per-100g nutrition profile used as KNN query vector.

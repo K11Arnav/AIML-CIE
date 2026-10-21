@@ -20,7 +20,9 @@ import pandas as pd
 from .config import (
     WORKOUT_DATA_FILE, NUTRITION_DATA_FILE, FOOD_DB_FILE, EXERCISES_FILE,
     WORKOUT_TARGET, WORKOUT_FEATURES, DIET_TARGETS, DIET_FEATURES,
+    ALLERGEN_FLAG_COLS,
 )
+from .allergens import derive_allergens
 
 
 def prepare_workout_frame(src: Path = WORKOUT_DATA_FILE) -> pd.DataFrame:
@@ -99,8 +101,10 @@ def prepare_food_catalog(src: Path = FOOD_DB_FILE) -> pd.DataFrame:
       sodium_mg -> sodium_100g (mg divided by 1000; recorded in meta)
     Unit-error outliers (energy > 950 kcal/100 g or sodium > 100 g/100 g)
     are excluded from the active catalog; count recorded in attrs.
-    No allergen-flag columns are created: absent columns mean "unknown", and
-    the recommender must never treat them as allergen-free.
+    Allergen flags (ALLERGEN_FLAG_COLS) are DERIVED from the food name by
+    keyword rules in ml/allergens.py: positive keyword -> True, no match ->
+    False ("not flagged", never "certified allergen-free"). Per-flag match
+    counts are recorded in attrs.
     """
     df = pd.read_excel(src)
     before = len(df)
@@ -121,8 +125,16 @@ def prepare_food_catalog(src: Path = FOOD_DB_FILE) -> pd.DataFrame:
         c for c in ["energy_kcal", "proteins_100g", "fat_100g", "carbs_100g",
                     "sugars_100g", "fiber_100g", "sodium_100g"] if c in df.columns]
     out = df[keep].copy()
+    # keyword-derived allergen flags (positive matches only)
+    flag_frames = pd.DataFrame(
+        [derive_allergens(n) for n in out["product_name"].astype(str)],
+        index=out.index)
+    for c in ALLERGEN_FLAG_COLS:
+        out[c] = flag_frames[c].astype(bool)
     out.attrs.update(rows_before=before, exact_dupes_removed=n_dupes,
-                     n_outliers_excluded=n_outliers, rows_after=len(out))
+                     n_outliers_excluded=n_outliers, rows_after=len(out),
+                     allergen_flag_counts={c: int(out[c].sum())
+                                           for c in ALLERGEN_FLAG_COLS})
     return out
 
 
