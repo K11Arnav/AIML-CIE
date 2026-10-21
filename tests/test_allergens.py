@@ -70,3 +70,35 @@ def test_flagged_helper():
     assert flagged(screen_text("paneer tikka")) == ["contains_dairy"]
     assert flagged(screen_text("peanut paneer eggs sandwich")) == [
         "contains_gluten", "contains_dairy", "contains_peanuts", "contains_eggs"]
+
+
+# ---- diet-preference screening (vegetarian/vegan) ----
+from ml.allergens import text_conflicts_with_diet
+
+
+def test_meat_detected_for_vegetarian():
+    assert text_conflicts_with_diet("Grilled chicken breast", "Vegetarian")
+    assert text_conflicts_with_diet("Beef steak pieces", "vegetarian")
+    assert text_conflicts_with_diet("Mutton biryani", "Vegetarian")
+    assert text_conflicts_with_diet("Fish curry", "Vegetarian")
+    assert text_conflicts_with_diet("Egg bhurji", "Vegetarian")
+    assert text_conflicts_with_diet("Roghan josh", "Vegetarian")
+    assert text_conflicts_with_diet("Rogan josh", "Vegetarian")
+
+
+def test_vegetarian_allows_dairy():
+    assert text_conflicts_with_diet("Paneer stuffed cheela", "Vegetarian") == []
+    assert text_conflicts_with_diet("Dahi tadka", "Vegetarian") == []
+
+
+def test_vegan_excludes_dairy_honey_eggs():
+    assert text_conflicts_with_diet("Paneer curry", "Vegan")
+    assert text_conflicts_with_diet("Honey glazed oats", "vegan")
+    assert text_conflicts_with_diet("Miel et avoine bowl", "Vegan")
+    assert text_conflicts_with_diet("Boiled egg", "Vegan")
+
+
+def test_omnivore_never_excludes():
+    assert text_conflicts_with_diet("Grilled chicken breast", "Omnivore") == []
+    assert text_conflicts_with_diet("Honey cake", "any") == []
+    assert text_conflicts_with_diet("Anything", "unknown-pref") == []

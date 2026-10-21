@@ -129,3 +129,67 @@ def derive_allergens(name: str) -> dict[str, bool]:
 def flagged(flags: dict[str, bool]) -> list[str]:
     """Compact list of the flags that are True."""
     return [f for f in ALLERGEN_FLAGS if flags.get(f)]
+
+
+# ---- diet-preference compatibility (vegetarian/vegan screening) ----
+# Not allergens: meat vocabulary is screened separately for diet preference.
+_MEAT_KEYWORDS = [
+    "chicken", "poulet", "beef", "boeuf", "bœuf", "mutton", "lamb", "agneau",
+    "pork", "porc", "bacon", "lardon", "ham", "jambon", "sausage",
+    "saucisse", "kebab", "brochette", "veal", "veau", "turkey", "dinde",
+    "duck", "canard", "meat", "viande", "keema", "qeema", "meatball",
+    "mortadella", "salami", "pepperoni", "chorizo", "prosciutto", "jerky",
+    "macher", "machher", "jhomka",
+    # unambiguous meat dishes: 'kofta'/'korma' stay ambiguous (many
+    # vegetarian variants exist in the catalog) but these are not
+    "roghan josh", "rogan josh", "gosht", "nihari", "haleem", "paye",
+    "nargisi kofta", "gushtaba",
+]
+MEAT_PATTERN = re.compile(
+    r"(?<![a-z])(" + "|".join(
+        re.escape(k) + r"(?:s|es|x)?" for k in _MEAT_KEYWORDS) + r")(?![a-z])",
+    re.IGNORECASE)
+HONEY_PATTERN = re.compile(r"(?<![a-z])honey|miel", re.IGNORECASE)
+
+_PATTERN_LABELS = ((MEAT_PATTERN, "meat keywords in name (not an allergen "
+                                  "flag — fish allergen flag covers fish)"),
+                   (HONEY_PATTERN, "honey"))
+
+# preference(casefold) -> (allergen flags to exclude, extra patterns to screen)
+DIET_EXCLUSIONS = {
+    "vegetarian": ({"contains_fish", "contains_eggs"}, (MEAT_PATTERN,)),
+    "vegan": ({"contains_fish", "contains_eggs", "contains_dairy"},
+              (MEAT_PATTERN, HONEY_PATTERN)),
+    "omnivore": (set(), ()),
+    "any": (set(), ()),
+}
+
+
+def text_conflicts_with_diet(text: str, preference: str) -> list[str]:
+    """Flags that exclude `text` for the given dietary preference.
+
+    Returns a list of reason strings (empty = compatible). Keyword-based:
+    'not excluded' is not a certified guarantee — verify recipes.
+    """
+    key = str(preference or "").strip().casefold()
+    a_flags, extra = DIET_EXCLUSIONS.get(key, (set(), ()))
+    if not a_flags and not extra:
+        return []
+    s = str(text or "")
+    reasons = [f for f, v in screen_text(s).items() if v and f in a_flags]
+    for pattern, label in _PATTERN_LABELS:
+        if pattern in extra and pattern.search(s):
+            reasons.append(label)
+    return reasons
+
+
+def row_conflicts_with_diet(texts, preference: str) -> dict[str, list[str]]:
+    """{text_string: [reasons]} for every conflicting text in an iterable."""
+    out = {}
+    for t in texts:
+        if t is None:
+            continue
+        reasons = text_conflicts_with_diet(t, preference)
+        if reasons:
+            out[str(t)] = reasons
+    return out

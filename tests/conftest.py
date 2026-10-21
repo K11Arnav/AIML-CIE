@@ -93,6 +93,8 @@ def food_frame_fixture(n=24, seed=3):
     names[1] = "peanut chikki bar"
     names[2] = "paneer curry"
     names[3] = "wheat bread slice"
+    names[4] = "grilled chicken breast"
+    names[5] = "beef steak pieces"
     df = pd.DataFrame({
         "food_code": [f"F{i:04d}" for i in range(n)],
         "product_name": names,

@@ -72,6 +72,30 @@ def test_dairy_allergy_excludes_paneer(rec):
     assert "contains_dairy" not in [f for i in out["items"] for f in i["allergen_flags"]]
 
 
+def test_vegetarian_excludes_meat_fish_eggs(rec):
+    out = rec.recommend_diet({**DIET_PROFILE, "dietary_preference": "Vegetarian"})
+    names = " ".join(i["product_name"] or "" for i in out["items"]).lower()
+    assert "chicken" not in names and "beef" not in names and "fish" not in names
+    ps = out["preference_screening"]
+    assert ps["preference"] == "vegetarian" and ps["foods_excluded"] >= 2
+    assert any(rt["type"] == "diet_preference_excluded"
+               for rt in out["filter_notes"])
+
+
+def test_vegan_excludes_dairy_and_honey(rec):
+    out = rec.recommend_diet({**DIET_PROFILE, "dietary_preference": "Vegan"})
+    names = " ".join(i["product_name"] or "" for i in out["items"]).lower()
+    assert "paneer" not in names
+    assert out["preference_screening"]["preference"] == "vegan"
+
+
+def test_omnivore_no_preference_filtering(rec):
+    out = rec.recommend_diet(DIET_PROFILE)
+    assert "preference_screening" not in out
+    assert not any(rt["type"] == "diet_preference_excluded"
+                   for rt in out.get("filter_notes", []))
+
+
 def test_meals_screened_when_allergies_mapped(rec):
     out = rec.recommend_diet({**DIET_PROFILE, "allergies": ["Peanuts"]})
     ms = out["meals"]["allergy_screening"]

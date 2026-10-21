@@ -350,23 +350,50 @@ class FitnessRecommender:
             base["unmet"] = (base.get("unmet", []) +
                              [f"goal={goal!r}: unmapped for food ranking; used median profile"])
         base["unmet"] = base.get("unmet", []) + a_unmet
-        # --- KNN food ranking (allergy-filtered) ---
-        catalog, items_excluded = self._apply_allergy_filter(self._food, flags)
+        # --- KNN food ranking (allergy + diet-preference filtered) ---
         n_before = int(len(self._food))
+        preference = str(profile.get("dietary_preference") or "any")
+        catalog, items_excluded = self._apply_allergy_filter(self._food, flags)
+        pref_before = int(len(catalog))
+        pref_map = {"Vegetarian": "vegetarian", "Vegan": "vegan"}
+        pref_key = pref_map.get(preference, _norm(preference, "any") or "any")
+        excluded_reasons, diet_excluded = [], 0
+        if pref_key not in ("omnivore", "any"):
+            compatible, reasons_by_name = [], {}
+            for _, r in catalog.iterrows():
+                reasons = AL.text_conflicts_with_diet(
+                    str(r.get("product_name") or ""), pref_key)
+                (reasons_by_name.setdefault(str(r["product_name"]), reasons)
+                 if reasons else compatible.append(r))
+            diet_excluded = int(pref_before - len(compatible))
+            catalog = pd.DataFrame(compatible).reset_index(drop=True)
+            if reasons_by_name:
+                excluded_reasons = [{
+                    "type": "diet_preference_excluded",
+                    "preference": pref_key, "n_rows": diet_excluded,
+                    "examples": list(reasons_by_name)[:5]}]
+            base["preference_screening"] = {
+                "preference": pref_key,
+                "basis": "Keyword-derived screening of food names "
+                         "(ml/allergens.py): fish/egg/meat excluded for "
+                         "vegetarian; additionally dairy and honey for vegan.",
+                "foods_excluded": diet_excluded,
+                "foods_screened": pref_before}
         if allergies:
             base["filter_notes"] = ([n for n in a_notes] + (
                 [{"type": "allergy_filtered", "n_rows": items_excluded,
                   "flags": sorted(flags)}] if items_excluded else []))
+        if excluded_reasons:
+            base["filter_notes"] = (base.get("filter_notes", []) +
+                                    excluded_reasons)
         if catalog.empty:
-            return {**base, "items": [],
-                    "allergen_warning": (
-                        "No foods remain after applying the mapped allergen "
-                        "flags " + (f"{sorted(flags)} " if flags else "") +
-                        "to keyword screening — no ranking is possible. "
-                        "Keyword rules flag positives only ('not flagged' is "
-                        "not a certified allergen-free guarantee)."),
-                    "excluded": [{"type": "allergy_excluded_all",
-                                  "n_rows": n_before}]}
+            why = ("No foods remain after applying allergy flags "
+                   + (f"{sorted(flags)} " if flags else "")
+                   + "and diet-preference screening — none of the "
+                   + str(n_before) + " catalog foods are compatible "
+                   "with the requested constraints.")
+            return {**base, "items": [], "allergen_warning": why,
+                    "excluded": [{"type": "excluded_all", "n_rows": n_before}]}
         if allergies:
             base["allergy_screening"] = {
                 "allergies": allergies,
@@ -426,6 +453,9 @@ class FitnessRecommender:
         rows = df
         if pref and _norm(pref) != "any":
             rows = rows[rows["Dietary Preference"].str.casefold() == _norm(pref)]
+        pref_map = {"Vegetarian": "vegetarian", "Vegan": "vegan"}
+        pref_key = pref_map.get(str(pref or "any"),
+                                _norm(pref, "any") or "any")
         goal = profile.get("fitness_goal")
         by_goal = rows[rows["Fitness Goal"].str.casefold() == _norm(goal)] if goal else rows.head(0)
         ordered_pools = []
@@ -444,6 +474,7 @@ class FitnessRecommender:
             for idx in list(pool.index)[:60]:
                 cand = self._nutrition.loc[idx]
                 warnings = self._row_allergy_warnings(cand, allergy_flags)
+                warnings.update(self._row_diet_warnings(cand, pref_key))
                 if row is None:
                     row, row_warnings = cand, warnings
                 if not warnings:
@@ -457,14 +488,17 @@ class FitnessRecommender:
             return {"matches": 0, "day": None,
                     "note": "No matching rows in nutrition_dataset.csv."}
         by_goal_n = int(len(by_goal))
+        screening_active = bool(allergy_flags) or pref_key in ("vegetarian", "vegan")
+        basis = "keyword-derived allergen + diet-preference rules " \
+                "(ml/allergens.py) applied to the suggestion texts"
         out = {
             "matches": int(len(rows)),
             "goal_matched_rows": by_goal_n,
             "selection_basis": ("Row from nutrition_dataset.csv with the calorie "
                                 "target closest to the model prediction"
                                 + ("; first candidate whose suggestions screen "
-                                   "clean against your mapped allergen flags"
-                                   if allergy_flags else "")
+                                   "clean against your mapped allergies and "
+                                   "diet preference" if screening_active else "")
                                 + "; retrieved suggestion, not generated."),
             "row_context": {"Activity Level": row.get("Activity Level"),
                             "Fitness Goal": row.get("Fitness Goal"),
@@ -475,14 +509,27 @@ class FitnessRecommender:
                             "Fat": _f(row.get("Fat"))},
             "suggestions": {slot: row.get(slot) for slot in MEAL_SLOTS},
             "allergy_screening": {
-                "screened": bool(allergy_flags),
-                "basis": "keyword-derived allergen rules (ml/allergens.py) "
-                         "applied to the suggestion texts"
-                if allergy_flags else "no mapped allergies — not screened",
+                "screened": screening_active,
+                "basis": basis if screening_active
+                else "no mapped allergies, omnivore preference — not screened",
                 "warnings": row_warnings,
             },
         }
         return out
+
+    @staticmethod
+    def _row_diet_warnings(row: pd.Series, pref_key: str) -> dict:
+        """{slot: [reasons]} where a meal-suggestion text conflicts with the
+        requested diet preference; empty when compatible/omnivore."""
+        slots = {}
+        for slot in MEAL_SLOTS:
+            text = row.get(slot)
+            if text is None or (isinstance(text, float) and pd.isna(text)):
+                continue
+            reasons = AL.text_conflicts_with_diet(str(text), pref_key)
+            if reasons:
+                slots[slot] = reasons
+        return slots
 
     @staticmethod
     def _row_allergy_warnings(row: pd.Series, flags: set) -> dict:

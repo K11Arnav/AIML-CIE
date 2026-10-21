@@ -55,11 +55,13 @@ the website gets results over HTTP.
    calorie target + protein/carbs/fat. Meal suggestions are retrieved rows from
    the same dataset, screened against your mapped allergies.
 3. **Foods:** KNN ranks the `Anuvaad_INDB` per-100 g catalog against a goal
-   reference nutrient profile. The Anuvaad catalog ships no allergen columns,
-   so allergen flags are DERIVED from food names by explicit keyword rules
-   (`ml/allergens.py`, unit-tested): any flagged food is excluded from the
-   ranking and meal text. "Not flagged" is never claimed to be certified
-   allergen-free — every allergy-filtered response carries this caveat.
+   reference nutrient profile. The Anuvaad catalog ships no allergen or diet
+   tags, so BOTH are DERIVED from food names by explicit keyword rules
+   (`ml/allergens.py`, unit-tested): any allergen-flagged food is excluded,
+   and dietary preference filters the ranking too (vegetarian excludes
+   fish/egg/meat keywords; vegan additionally dairy and honey). "Not
+   flagged" is never claimed to be certified allergen-free — every filtered
+   response carries this caveat.
 
 So: two small RF models + one KNN bundle + one deterministic layout table —
 every number traceable to a dataset or a documented constant.
@@ -85,8 +87,8 @@ every field you send is consumed by a model:
 | `activity_level` | optional | diet RF feature (4 levels, nutrition-dataset vocabulary) |
 | `workout_days_per_week` | optional | weekly split (default 4, reported) |
 | `injuries_or_limitations` | optional | workout RF `Injury` feature + safety warning |
-| `dietary_preference` | optional | diet RF feature + meal retrieval |
 | `allergies` | optional | keyword-derived allergen-flag filtering (food ranking + meal screening) |
+| `dietary_preference` | optional | diet RF feature + meal retrieval + food-ranking diet screening (vegetarian/vegan) |
 
 Goal values (exact training vocabulary): Weight Loss, Muscle Gain, General
 Health, Strength, Endurance, Tone Up, Powerlifting, Flexibility, CrossFit,

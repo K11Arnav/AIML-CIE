@@ -192,6 +192,8 @@ function UnifiedResults({ data }) {
       {allergyNote && <p className="warn">{allergyNote}</p>}
       {diet.meals && <MealsCard meals={diet.meals} />}
       <h3>Foods ranked for your goal ({data.diet_goal})</h3>
+      {diet.preference_screening && <p className="meta">{diet.preference_screening.foods_excluded} of {diet.preference_screening.foods_screened} foods excluded by {diet.preference_screening.preference} screening.</p>}
+      {diet.allergy_screening && <p className="meta">{diet.allergy_screening.foods_excluded} further foods excluded by allergy flags: {diet.allergy_screening.flags_applied.join(", ")}.</p>}
       {(diet.items || []).length === 0 && <p>No matching foods (check allergy screening above).</p>}
       {(diet.items || []).map((item) => <FoodCard key={item.rank + (item.product_name || "")} item={item} />)}
     </div>
