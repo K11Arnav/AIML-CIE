@@ -11,12 +11,15 @@ async function postJson(path, body) {
   return data;
 }
 
-export async function fetchWorkout(profile) {
-  return postJson("/api/recommendations/workout", profile);
+export async function fetchUnified(profile) {
+  return postJson("/api/recommendations/unified", profile);
 }
 
-export async function fetchDiet(profile) {
-  return postJson("/api/recommendations/diet", profile);
+export async function fetchUnifiedOptions() {
+  const r = await fetch(`${API_BASE}/api/options/unified`);
+  const data = await r.json().catch(() => null);
+  if (!r.ok || !data?.success) throw new Error((data && data.error) || "Options unavailable");
+  return data;
 }
 
 export async function fetchHealth() {
@@ -24,20 +27,4 @@ export async function fetchHealth() {
   const data = await r.json().catch(() => null);
   if (!r.ok) throw new Error("Backend unavailable");
   return data;
-}
-
-export async function fetchOptions() {
-  const [w, d] = await Promise.all([
-    fetch(`${API_BASE}/api/options/workout`).then(async (r) => {
-      const data = await r.json().catch(() => null);
-      if (!r.ok || !data?.success) throw new Error((data && data.error) || "Workout options unavailable");
-      return data;
-    }),
-    fetch(`${API_BASE}/api/options/diet`).then(async (r) => {
-      const data = await r.json().catch(() => null);
-      if (!r.ok || !data?.success) throw new Error((data && data.error) || "Diet options unavailable");
-      return data;
-    }),
-  ]);
-  return { workout: w, diet: d };
 }

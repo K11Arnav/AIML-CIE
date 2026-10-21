@@ -82,6 +82,63 @@ def options_diet():
         return JSONResponse({"success": False, "error": "Could not build options"}, status_code=500)
 
 
+@app.get("/options/unified")
+def options_unified():
+    rec, err = _require_model()
+    if err is not None:
+        return err
+    try:
+        from ml.options import workout_options
+        from ml.unified import (GOALS, EQUIPMENT_LABELS, FITNESS_LEVELS,
+                                ACTIVITY_LEVELS, DIET_PREFERENCES, SAFETY_NOTE)
+        w = _options_cache.get("workout") if _options_cache else None
+        if w is None:
+            w = workout_options(rec._workout)
+        # Diet dropdown values come from the unified contract (not the legacy
+        # training frame, which may be absent); recipe courses read live catalog.
+        try:
+            from ml.recipes import prepare_recipe_catalog
+            _r, _ = prepare_recipe_catalog()
+            recipe_courses = sorted(_r["course"].dropna().unique().tolist())
+        except Exception:
+            recipe_courses = []
+        d = {"goals": list(GOALS),
+             "allergies": ["Gluten", "Peanuts", "Dairy", "Soy", "Eggs", "Fish"],
+             "recipe_courses": recipe_courses}
+        return {"success": True,
+                "goals": list(GOALS),
+                "equipment": [{"value": k, "label": v} for k, v in EQUIPMENT_LABELS.items()],
+                "fitness_levels": list(FITNESS_LEVELS),
+                "activity_levels": list(ACTIVITY_LEVELS),
+                "dietary_preferences": list(DIET_PREFERENCES),
+                "safety_note": SAFETY_NOTE,
+                "workout": w, "diet": d}
+    except Exception:
+        return JSONResponse({"success": False, "error": "Could not build options"}, status_code=500)
+
+
+@app.post("/recommendations/unified")
+async def unified(request: Request):
+    rec, err = _require_model()
+    if err is not None:
+        return err
+    try:
+        profile = await request.json()
+    except Exception:
+        return JSONResponse({"success": False, "error": "Request body must be JSON"}, status_code=400)
+    if not isinstance(profile, dict):
+        return JSONResponse({"success": False, "error": "Request body must be a JSON object"}, status_code=400)
+    try:
+        from ml.unified import recommend_unified
+        return recommend_unified(rec, profile)
+    except ValueError as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=400)
+    except FileNotFoundError as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=503)
+    except Exception:
+        return JSONResponse({"success": False, "error": "Recommendation failed"}, status_code=500)
+
+
 @app.post("/recommendations/workout")
 async def workout(request: Request):
     rec, err = _require_model()

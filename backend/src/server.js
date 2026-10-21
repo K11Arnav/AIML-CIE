@@ -40,7 +40,14 @@ function createApp(fetchImpl = fetch) {
     forward(res, fetchImpl, "/recommendations/diet", req.body);
   });
 
-  for (const kind of ["workout", "diet"]) {
+  // Unified profile: one submit feeds both recommenders (validated here AND in Python).
+  app.post("/api/recommendations/unified", async (req, res) => {
+    const err = validateUnified(req.body);
+    if (err) return res.status(400).json({ success: false, error: err });
+    forward(res, fetchImpl, "/recommendations/unified", req.body);
+  });
+
+  for (const kind of ["workout", "diet", "unified"]) {
     app.get(`/api/options/${kind}`, async (req, res) => {
       try {
         const r = await fetchWithTimeout(fetchImpl, `${ML_SERVICE_URL}/options/${kind}`, {}, ML_TIMEOUT_MS);
@@ -62,6 +69,37 @@ function createApp(fetchImpl = fetch) {
   });
 
   return app;
+}
+
+function validateUnified(p) {
+  // Mirrors ml/unified.py ranges. Python re-validates; this fails fast with 400s.
+  if (!p || typeof p !== "object" || Array.isArray(p)) return "Request body must be a JSON object";
+  for (const f of ["age", "height_cm", "weight_kg"]) {
+    if (p[f] === undefined || typeof p[f] !== "number" || !(p[f] > 0)) return `${f} must be a positive number`;
+  }
+  if (p.age < 5 || p.age > 100) return "age must be between 5 and 100";
+  if (p.height_cm < 50 || p.height_cm > 250) return "height_cm must be between 50 and 250";
+  if (p.weight_kg < 20 || p.weight_kg > 300) return "weight_kg must be between 20 and 300";
+  const norm = (v) => String(v ?? "").trim().toLowerCase();
+  if (!["female", "male"].includes(norm(p.gender))) return "gender must be one of: Female, Male";
+  if (!["weight loss", "muscle gain", "general fitness"].includes(norm(p.goal)))
+    return "goal must be one of: weight loss, muscle gain, general fitness";
+  if (!["bodyweight", "dumbbells", "full gym"].includes(norm(p.equipment)))
+    return "equipment must be one of: bodyweight, dumbbells, full gym";
+  if (p.workout_duration_minutes === undefined || typeof p.workout_duration_minutes !== "number" || !(p.workout_duration_minutes > 0))
+    return "workout_duration_minutes must be a positive number";
+  if (p.fitness_level !== undefined && !["beginner", "intermediate", "advanced"].includes(norm(p.fitness_level)))
+    return "fitness_level must be one of: beginner, intermediate, advanced";
+  if (p.activity_level !== undefined && !["sedentary", "moderate", "active"].includes(norm(p.activity_level)))
+    return "activity_level must be one of: sedentary, moderate, active";
+  if (p.workout_days_per_week !== undefined && (!Number.isInteger(p.workout_days_per_week) || p.workout_days_per_week < 1 || p.workout_days_per_week > 7))
+    return "workout_days_per_week must be an integer between 1 and 7";
+  if (p.dietary_preference !== undefined && !["any", "vegetarian", "non vegetarian"].includes(norm(p.dietary_preference)))
+    return "dietary_preference must be one of: any, vegetarian, non vegetarian";
+  if (p.allergies !== undefined && !Array.isArray(p.allergies)) return "allergies must be an array";
+  if (p.injuries_or_limitations !== undefined && typeof p.injuries_or_limitations !== "string")
+    return "injuries_or_limitations must be a string";
+  return null;
 }
 
 function validateWorkout(p) {
@@ -148,4 +186,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { createApp, validateWorkout, validateDiet };
+module.exports = { createApp, validateWorkout, validateDiet, validateUnified };

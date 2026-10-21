@@ -14,6 +14,10 @@ frontend/.env
 # Logs
 *.log
 
+# Notebooks live outside this repo (team Colab, see README). Keep code-only.
+*.ipynb
+.ipynb_checkpoints/
+
 # Large files: NOT committed (GitHub 100 MB limit; clone stays light).
 # Diet/food path works from committed small artifacts. For workouts, place the
 # programs file in datasets/ (see README "Large files" section).
@@ -21,4 +25,3 @@ artifacts/workout_catalog.csv
 datasets/programs_detailed_boostcamp_kaggle.csv
 data/archive_unused/
 .venv/
-notebooks/.ipynb_checkpoints/

@@ -1,7 +1,7 @@
 // Backend tests: validation, forwarding, timeout, error mapping. No network.
 const { test, describe } = require("node:test");
 const assert = require("node:assert/strict");
-const { createApp, validateWorkout, validateDiet } = require("../src/server.js");
+const { createApp, validateWorkout, validateDiet, validateUnified } = require("../src/server.js");
 
 function fakeFetch(handler) {
   return async (url, opts) => handler(url, opts);
@@ -45,6 +45,17 @@ describe("validation", () => {
     assert.match(validateDiet({ diet_preference: "vegan" }), /diet_preference/);
     assert.match(validateDiet({ max_time_min: -5 }), /max_time_min/);
     assert.equal(validateDiet({ course: "dessert", diet_preference: "vegetarian", max_time_min: 45 }), null);
+  });
+  test("unified validates canonical profile", () => {
+    const ok = { age: 30, height_cm: 165, weight_kg: 65, gender: "Female", goal: "weight loss", equipment: "dumbbells", workout_duration_minutes: 45 };
+    assert.equal(validateUnified(ok), null);
+    assert.equal(validateUnified({ ...ok, fitness_level: "beginner", activity_level: "active", workout_days_per_week: 4, dietary_preference: "vegetarian", allergies: [] }), null);
+    assert.match(validateUnified({}), /age/);
+    assert.match(validateUnified({ ...ok, age: -1 }), /age/);
+    assert.match(validateUnified({ ...ok, goal: "marathon" }), /goal/);
+    assert.match(validateUnified({ ...ok, equipment: "barbell" }), /equipment/);
+    assert.match(validateUnified({ ...ok, workout_days_per_week: 9 }), /workout_days_per_week/);
+    assert.match(validateUnified([1]), /object/);
   });
 });
 
@@ -106,7 +117,14 @@ describe("forwarding", () => {
     assert.equal(r.body.error, "ML service unavailable");
     assert.ok(!JSON.stringify(r.body).includes("secret-path"));
   });
-  test("local validation rejects before forwarding", async () => {
+  test("unified forwards combined result", async () => {
+    const mlBody = { success: true, recommendation_type: "unified", diet: { items: [] }, workout: { primary: null } };
+    const app = createApp(fakeFetch(async () => jsonResponse(200, mlBody)));
+    const r = await post(app, "/api/recommendations/unified", { age: 30, height_cm: 165, weight_kg: 65, gender: "Female", goal: "general fitness", equipment: "full gym", workout_duration_minutes: 60 });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.recommendation_type, "unified");
+  });
+  test("unified local validation rejects before forwarding", async () => {
     let called = false;
     const app = createApp(fakeFetch(async () => { called = true; return jsonResponse(200, {}); }));
     const r = await post(app, "/api/recommendations/diet", { top_k: 999 });
