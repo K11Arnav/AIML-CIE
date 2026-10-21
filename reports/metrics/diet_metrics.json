@@ -1,232 +1,37 @@
 {
-  "random_forest": {
-    "accuracy": 0.39,
-    "precision_macro": 0.369,
-    "recall_macro": 0.3686,
-    "f1_macro": 0.3682,
-    "precision_weighted": 0.3843,
-    "recall_weighted": 0.39,
-    "f1_weighted": 0.3865,
-    "confusion_matrix": [
-      [
-        42,
-        23,
-        20
-      ],
-      [
-        24,
-        12,
-        16
-      ],
-      [
-        27,
-        12,
-        24
-      ]
-    ],
-    "classes": [
-      "Balanced",
-      "Low_Carb",
-      "Low_Sodium"
-    ],
-    "classification_report": {
-      "Balanced": {
-        "precision": 0.45161290322580644,
-        "recall": 0.49411764705882355,
-        "f1-score": 0.47191011235955055,
-        "support": 85.0
-      },
-      "Low_Carb": {
-        "precision": 0.2553191489361702,
-        "recall": 0.23076923076923078,
-        "f1-score": 0.24242424242424243,
-        "support": 52.0
-      },
-      "Low_Sodium": {
-        "precision": 0.4,
-        "recall": 0.38095238095238093,
-        "f1-score": 0.3902439024390244,
-        "support": 63.0
-      },
-      "accuracy": 0.39,
-      "macro avg": {
-        "precision": 0.36897735072065885,
-        "recall": 0.3686130862601451,
-        "f1-score": 0.3681927524076058,
-        "support": 200.0
-      },
-      "weighted avg": {
-        "precision": 0.384318462594372,
-        "recall": 0.39,
-        "f1-score": 0.38651893005140464,
-        "support": 200.0
-      }
-    }
+  "data": {
+    "rows_before": 500,
+    "junk_header_rows_removed": 2,
+    "weight_maintenance_merged": 3,
+    "nonpositive_missing_dropped": 0,
+    "rows_after": 498
   },
-  "dummy_stratified": {
-    "accuracy": 0.38,
-    "precision_macro": 0.3476,
-    "recall_macro": 0.3536,
-    "f1_macro": 0.3473,
-    "precision_weighted": 0.3641,
-    "recall_weighted": 0.38,
-    "f1_weighted": 0.3691,
-    "confusion_matrix": [
-      [
-        42,
-        16,
-        27
-      ],
-      [
-        28,
-        8,
-        16
-      ],
-      [
-        26,
-        11,
-        26
-      ]
-    ],
-    "classes": [
-      "Balanced",
-      "Low_Carb",
-      "Low_Sodium"
-    ],
-    "classification_report": {
-      "Balanced": {
-        "precision": 0.4375,
-        "recall": 0.49411764705882355,
-        "f1-score": 0.46408839779005523,
-        "support": 85.0
-      },
-      "Low_Carb": {
-        "precision": 0.22857142857142856,
-        "recall": 0.15384615384615385,
-        "f1-score": 0.1839080459770115,
-        "support": 52.0
-      },
-      "Low_Sodium": {
-        "precision": 0.37681159420289856,
-        "recall": 0.4126984126984127,
-        "f1-score": 0.3939393939393939,
-        "support": 63.0
-      },
-      "accuracy": 0.38,
-      "macro avg": {
-        "precision": 0.34762767425810903,
-        "recall": 0.35355407120113,
-        "f1-score": 0.3473119459021536,
-        "support": 200.0
-      },
-      "weighted avg": {
-        "precision": 0.36406172360248445,
-        "recall": 0.38,
-        "f1-score": 0.3691445701057055,
-        "support": 200.0
-      }
+  "targets": [
+    "Daily Calorie Target",
+    "Protein",
+    "Carbohydrates",
+    "Fat"
+  ],
+  "per_target": {
+    "Daily Calorie Target": {
+      "mae": 101.069,
+      "r2": 0.908,
+      "baseline_mae": 370.889
+    },
+    "Protein": {
+      "mae": 12.454,
+      "r2": 0.786,
+      "baseline_mae": 30.369
+    },
+    "Carbohydrates": {
+      "mae": 22.614,
+      "r2": 0.734,
+      "baseline_mae": 49.979
+    },
+    "Fat": {
+      "mae": 6.488,
+      "r2": 0.704,
+      "baseline_mae": 12.111
     }
-  },
-  "n_train": 800,
-  "n_test": 200,
-  "features_numeric": [
-    "Age",
-    "Weight_kg",
-    "Height_cm",
-    "BMI",
-    "Daily_Caloric_Intake",
-    "Cholesterol_mg/dL",
-    "Blood_Pressure_mmHg",
-    "Glucose_mg/dL",
-    "Weekly_Exercise_Hours",
-    "Adherence_to_Diet_Plan",
-    "Dietary_Nutrient_Imbalance_Score"
-  ],
-  "features_categorical": [
-    "Gender",
-    "Severity",
-    "Physical_Activity_Level",
-    "Dietary_Restrictions",
-    "Allergies",
-    "Preferred_Cuisine"
-  ],
-  "excluded": [
-    "Patient_ID",
-    "Disease_Type (target proxy)"
-  ],
-  "target_distribution": {
-    "Balanced": 426,
-    "Low_Sodium": 316,
-    "Low_Carb": 258
-  },
-  "feature_importance": [
-    {
-      "feature": "Cholesterol_mg/dL",
-      "importance": 0.07910924950703033
-    },
-    {
-      "feature": "Weekly_Exercise_Hours",
-      "importance": 0.0777458737669044
-    },
-    {
-      "feature": "Glucose_mg/dL",
-      "importance": 0.07760697217868537
-    },
-    {
-      "feature": "Adherence_to_Diet_Plan",
-      "importance": 0.07755559745413587
-    },
-    {
-      "feature": "Daily_Caloric_Intake",
-      "importance": 0.07626373770067837
-    },
-    {
-      "feature": "Weight_kg",
-      "importance": 0.06941271053983787
-    },
-    {
-      "feature": "BMI",
-      "importance": 0.06883935392513528
-    },
-    {
-      "feature": "Blood_Pressure_mmHg",
-      "importance": 0.06822454909218646
-    },
-    {
-      "feature": "Age",
-      "importance": 0.06779510684372919
-    },
-    {
-      "feature": "Dietary_Nutrient_Imbalance_Score",
-      "importance": 0.06730976435837627
-    },
-    {
-      "feature": "Height_cm",
-      "importance": 0.06313933396863522
-    },
-    {
-      "feature": "Preferred_Cuisine",
-      "importance": 0.04223294652587487
-    },
-    {
-      "feature": "Dietary_Restrictions",
-      "importance": 0.03772991338097913
-    },
-    {
-      "feature": "Physical_Activity_Level",
-      "importance": 0.03476219478384388
-    },
-    {
-      "feature": "Severity",
-      "importance": 0.03458282921663702
-    },
-    {
-      "feature": "Allergies",
-      "importance": 0.03392271933876087
-    },
-    {
-      "feature": "Gender",
-      "importance": 0.023767147418569654
-    }
-  ]
+  }
 }

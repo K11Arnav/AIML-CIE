@@ -40,21 +40,22 @@ describe("validation", () => {
     assert.match(validateDiet({ allergies: "Peanuts" }), /allergies/);
     assert.equal(validateDiet({ top_k: 5 }), null);
   });
-  test("diet rejects bad course, diet_preference, max_time", () => {
-    assert.match(validateDiet({ course: "breakfast" }), /course/);
-    assert.match(validateDiet({ diet_preference: "vegan" }), /diet_preference/);
-    assert.match(validateDiet({ max_time_min: -5 }), /max_time_min/);
-    assert.equal(validateDiet({ course: "dessert", diet_preference: "vegetarian", max_time_min: 45 }), null);
+  test("diet rejects bad preference, goal, activity", () => {
+    assert.match(validateDiet({ Dietary_Preference: "carnivore" }), /dietary_preference/);
+    assert.match(validateDiet({ goal: "bulking" }), /goal/);
+    assert.match(validateDiet({ activity_level: "hyper" }), /activity/);
+    assert.equal(validateDiet({ top_k: 5, goal: "muscle", dietary_preference: "Vegan" }), null);
   });
   test("unified validates canonical profile", () => {
-    const ok = { age: 30, height_cm: 165, weight_kg: 65, gender: "Female", goal: "weight loss", equipment: "dumbbells", workout_duration_minutes: 45 };
+    const ok = { age: 30, height_cm: 165, weight_kg: 65, gender: "Female", goal: "Muscle Gain", equipment: "home dumbbells", workout_duration_minutes: 45 };
     assert.equal(validateUnified(ok), null);
-    assert.equal(validateUnified({ ...ok, fitness_level: "beginner", activity_level: "active", workout_days_per_week: 4, dietary_preference: "vegetarian", allergies: [] }), null);
+    assert.equal(validateUnified({ ...ok, fitness_level: "beginner", activity_level: "very active", workout_days_per_week: 4, injuries_or_limitations: "knee", dietary_preference: "vegan", allergies: [] }), null);
     assert.match(validateUnified({}), /age/);
     assert.match(validateUnified({ ...ok, age: -1 }), /age/);
-    assert.match(validateUnified({ ...ok, goal: "marathon" }), /goal/);
+    assert.match(validateUnified({ ...ok, goal: "marathon" }), /goal/); // exact value required
     assert.match(validateUnified({ ...ok, equipment: "barbell" }), /equipment/);
     assert.match(validateUnified({ ...ok, workout_days_per_week: 9 }), /workout_days_per_week/);
+    assert.match(validateUnified({ ...ok, injuries_or_limitations: "hip" }), /injuries/);
     assert.match(validateUnified([1]), /object/);
   });
 });
@@ -120,7 +121,7 @@ describe("forwarding", () => {
   test("unified forwards combined result", async () => {
     const mlBody = { success: true, recommendation_type: "unified", diet: { items: [] }, workout: { primary: null } };
     const app = createApp(fakeFetch(async () => jsonResponse(200, mlBody)));
-    const r = await post(app, "/api/recommendations/unified", { age: 30, height_cm: 165, weight_kg: 65, gender: "Female", goal: "general fitness", equipment: "full gym", workout_duration_minutes: 60 });
+    const r = await post(app, "/api/recommendations/unified", { age: 30, height_cm: 165, weight_kg: 65, gender: "Female", goal: "General Health", equipment: "full home gym", workout_duration_minutes: 60 });
     assert.equal(r.status, 200);
     assert.equal(r.body.recommendation_type, "unified");
   });

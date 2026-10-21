@@ -1,6 +1,0 @@
-type,component,data,accuracy,macro_P,macro_R,macro_F1,weighted_F1,ranking,compliance,note
-diet,RandomForest,"diet n=1000, test n=200",0.39,0.369,0.3686,0.3682,0.3865,N/A,N/A,weak; goal not a feature
-diet,Dummy baseline,same split,0.38,0.3476,0.3536,0.3473,0.3691,N/A,N/A,stratified baseline
-workout,classifier,none,N/A,N/A,N/A,N/A,N/A,N/A,N/A,BLOCKED: no target/dataset; labels must not be invented
-workout,constraint pipeline,"604k-row catalog, 5 probe cases",N/A,N/A,N/A,N/A,N/A,N/A,caps respected; incompatible excluded+reported; titles real,"rule compliance, not accuracy"
-diet,KNN + eligibility,100 Indian foods,N/A,N/A,N/A,N/A,N/A,N/A (no relevance labels),0 violations; missing flagged; allergy->empty+warning,needs manual relevance set for quality scores

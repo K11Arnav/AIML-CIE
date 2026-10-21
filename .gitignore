@@ -18,10 +18,10 @@ frontend/.env
 *.ipynb
 .ipynb_checkpoints/
 
-# Large files: NOT committed (GitHub 100 MB limit; clone stays light).
-# Diet/food path works from committed small artifacts. For workouts, place the
-# programs file in datasets/ (see README "Large files" section).
-artifacts/workout_catalog.csv
-datasets/programs_detailed_boostcamp_kaggle.csv
+# NOTE on artifacts/: ALL current artifacts are small (12 MB total) and
+# committed so the app runs after a plain clone. `python -m ml.train`
+# reproduces every artifact from datasets/ deterministically.
+
+# Retired datasets (archived locally only, never read by the pipeline)
 data/archive_unused/
-.venv/
+

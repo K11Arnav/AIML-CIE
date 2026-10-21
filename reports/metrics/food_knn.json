@@ -1,0 +1,13 @@
+{
+  "rows": 1014,
+  "cols": [
+    "energy_kcal",
+    "fat_100g",
+    "carbs_100g",
+    "sugars_100g",
+    "fiber_100g",
+    "proteins_100g",
+    "sodium_100g"
+  ],
+  "goal_targets": "config.GOAL_NUTRITION_TARGETS"
+}

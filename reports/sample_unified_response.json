@@ -1,0 +1,406 @@
+{
+  "success": true,
+  "recommendation_type": "unified",
+  "profile": {
+    "age": 30.0,
+    "height_cm": 165.0,
+    "weight_kg": 65.0,
+    "gender": "Female",
+    "goal": "Muscle Gain",
+    "equipment": "Home Dumbbells",
+    "workout_duration_minutes": 45.0,
+    "fitness_level": "intermediate",
+    "activity_level": "moderately active",
+    "workout_days_per_week": 4,
+    "injuries_or_limitations": "None",
+    "dietary_preference": "any",
+    "allergies": [],
+    "bmi": 23.9
+  },
+  "safety_note": "Informational only \u2014 not medical advice. Stop and consult a professional if anything hurts.",
+  "diet_goal": "muscle",
+  "daily_calorie_target_formula": {
+    "kcal_per_day": 2124,
+    "method": "Mifflin-St Jeor BMR x activity factor (moderately active=1.55); maintenance-level, goal-neutral",
+    "source": "calculation",
+    "activity_level_used": "moderately active",
+    "activity_assumed": false,
+    "disclaimer": "Estimate only, not clinical advice: actual needs vary with body composition, health conditions, and real activity."
+  },
+  "diet": {
+    "method": "RandomForest regressor trained on datasets/nutrition_dataset.csv (features: Age, Gender, Height, Weight, Activity Level, Fitness Goal, Dietary Preference -> calorie target + macros)",
+    "predicted": {
+      "Daily Calorie Target": 2215.0,
+      "Protein": 115.1,
+      "Carbohydrates": 259.1,
+      "Fat": 67.7
+    },
+    "input_features": {
+      "Age": 30.0,
+      "Height": 165.0,
+      "Weight": 65.0,
+      "Gender": "Female",
+      "Activity Level": "Moderately Active",
+      "Fitness Goal": "Muscle Gain",
+      "Dietary Preference": "Omnivore"
+    },
+    "model_quality_area": {
+      "mae": {
+        "Daily Calorie Target": 101.069,
+        "Protein": 12.454,
+        "Carbohydrates": 22.614,
+        "Fat": 6.488
+      },
+      "r2": {
+        "Daily Calorie Target": 0.908,
+        "Protein": 0.786,
+        "Carbohydrates": 0.734,
+        "Fat": 0.704
+      }
+    },
+    "food_ranking_method": "KNN ranks the Anuvaad per-100g food catalog by scaled Euclidean distance to the goal reference nutrient profile. Distance measures closeness, not suitability.",
+    "meals_method": "Meal suggestions are retrieved from nutrition_dataset.csv rows matching your dietary preference; none are generated or validated for allergies.",
+    "catalog_used": {
+      "key": "food_catalog.csv (Anuvaad INDB per 100g)",
+      "rows": 1014,
+      "allergen_data": false
+    },
+    "version": "2.0",
+    "filter_notes": [],
+    "items": [
+      {
+        "rank": 1,
+        "product_name": "Roast chicken",
+        "energy_kcal": 199.903,
+        "proteins_100g": 20.486,
+        "fat_100g": 13.063,
+        "carbs_100g": 0.1,
+        "sugars_100g": 0.046,
+        "fiber_100g": 0.031,
+        "sodium_100g": 0.072,
+        "missing_nutrition": [],
+        "rank_reason": "KNN rank #1 of 1014 catalog foods over scaled per-100g columns energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+        "serving_basis": "per 100 g (Anuvaad INDB composition table)"
+      },
+      {
+        "rank": 2,
+        "product_name": "Lemon chicken",
+        "energy_kcal": 169.789,
+        "proteins_100g": 20.198,
+        "fat_100g": 9.655,
+        "carbs_100g": 0.551,
+        "sugars_100g": 0.162,
+        "fiber_100g": 0.16,
+        "sodium_100g": 0.08,
+        "missing_nutrition": [],
+        "rank_reason": "KNN rank #2 of 1014 catalog foods over scaled per-100g columns energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+        "serving_basis": "per 100 g (Anuvaad INDB composition table)"
+      },
+      {
+        "rank": 3,
+        "product_name": "Fish tikka",
+        "energy_kcal": 117.331,
+        "proteins_100g": 15.997,
+        "fat_100g": 4.149,
+        "carbs_100g": 3.907,
+        "sugars_100g": 1.181,
+        "fiber_100g": 1.178,
+        "sodium_100g": 0.503,
+        "missing_nutrition": [],
+        "rank_reason": "KNN rank #3 of 1014 catalog foods over scaled per-100g columns energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+        "serving_basis": "per 100 g (Anuvaad INDB composition table)"
+      },
+      {
+        "rank": 4,
+        "product_name": "Tandoori chicken",
+        "energy_kcal": 145.199,
+        "proteins_100g": 16.264,
+        "fat_100g": 7.933,
+        "carbs_100g": 2.336,
+        "sugars_100g": 1.584,
+        "fiber_100g": 0.505,
+        "sodium_100g": 0.158,
+        "missing_nutrition": [],
+        "rank_reason": "KNN rank #4 of 1014 catalog foods over scaled per-100g columns energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+        "serving_basis": "per 100 g (Anuvaad INDB composition table)"
+      },
+      {
+        "rank": 5,
+        "product_name": "Lemon butter fish",
+        "energy_kcal": 160.246,
+        "proteins_100g": 16.383,
+        "fat_100g": 10.259,
+        "carbs_100g": 0.754,
+        "sugars_100g": 0.228,
+        "fiber_100g": 0.362,
+        "sodium_100g": 0.188,
+        "missing_nutrition": [],
+        "rank_reason": "KNN rank #5 of 1014 catalog foods over scaled per-100g columns energy_kcal, fat_100g, carbs_100g, sugars_100g, fiber_100g, proteins_100g, sodium_100g",
+        "serving_basis": "per 100 g (Anuvaad INDB composition table)"
+      }
+    ],
+    "meals": {
+      "matches": 228,
+      "goal_matched_rows": 77,
+      "selection_basis": "Row from nutrition_dataset.csv with the calorie target closest to the model prediction; retrieved suggestion, not generated.",
+      "row_context": {
+        "Activity Level": "Lightly Active",
+        "Fitness Goal": "Muscle Gain",
+        "Dietary Preference": "Omnivore",
+        "Daily Calorie Target": 2200.0,
+        "Protein": 90.0,
+        "Carbohydrates": 300.0,
+        "Fat": 60.0
+      },
+      "suggestions": {
+        "Breakfast Suggestion": "Oatmeal with berries and nuts",
+        "Lunch Suggestion": "Chicken breast with brown rice and steamed vegetables",
+        "Dinner Suggestion": "Salmon with roasted vegetables",
+        "Snack Suggestion": "Protein bar"
+      }
+    }
+  },
+  "workout": {
+    "method": "RandomForest classifier trained on datasets/smartfit_workout_dataset.csv (features: Age, Gender, Weight_kg, Height_cm, Goal, Equipment, Experience, Injury -> Recommended_Plan)",
+    "usage": "Follow ONE plan: the primary plan, or ONE alternative instead of it \u2014 never all of them.",
+    "equipment_constrained": true,
+    "model_quality": {
+      "test_accuracy": 1.0,
+      "test_f1_macro": 1.0,
+      "dummy_accuracy": 0.1466
+    },
+    "raw_probabilities": {
+      "3-Day Full Body Mix": 0.0048,
+      "5x3x1 Strength Program": 0.0223,
+      "5x5 Compound Lifts": 0.01156,
+      "Advanced Calisthenics": 0.03847,
+      "Bodyweight Circuit": 0.01835,
+      "Core Stability, Yoga & Walking": 0.00351,
+      "Daily 30-min Bodyweight Flow": 0.00503,
+      "Dumbbell Upper/Lower Split": 0.45578,
+      "Full Body Dumbbell Complex": 0.16161,
+      "HIIT with Dumbbells": 0.06272,
+      "High Reps Low Weight Sculpting": 0.02237,
+      "Jump Rope & Burpee Intervals": 0.00977,
+      "Long Distance Running Plan": 0.03455,
+      "Lower Body Bodyweight & Hiking": 0.01905,
+      "Lower Body Power & Stationary Bike": 0.00067,
+      "Metabolic Resistance Training": 0.00706,
+      "Olympic Lifting & Plyometrics": 0.01076,
+      "Push-Pull-Legs Split (Hypertrophy)": 0.04169,
+      "Seated Upper Body Strength & Rowing": 0.01062,
+      "Swimming & Upper Body Machines": 0.0,
+      "Treadmill Intervals & Circuit Training": 0.00433,
+      "Upper Body Calisthenics & Core": 0.00392,
+      "WOD & High Intensity Functional Training": 0.03164,
+      "Yoga & Mobility Flow": 0.01944
+    },
+    "constraints": {
+      "equipment": "Home Dumbbells",
+      "workout_days_per_week": 4
+    },
+    "unmet": [],
+    "version": "2.0",
+    "primary": {
+      "rank": 1,
+      "plan": "Dumbbell Upper/Lower Split",
+      "model_probability": 0.57864,
+      "equipment": "Home Dumbbells",
+      "goal": "Muscle Gain",
+      "experience_level": "Intermediate",
+      "injury": "None",
+      "workout_days_per_week": 4,
+      "style": "upper/lower split",
+      "sets": 4,
+      "reps": 8,
+      "duration_check": {
+        "requested": 45.0,
+        "estimated": 33.0,
+        "fits": true,
+        "note": "Estimated session fits the requested minutes."
+      },
+      "layout": {
+        "days": [
+          {
+            "day": 1,
+            "body_part": "upper legs",
+            "pool_size": 5,
+            "exercises": [
+              {
+                "name": "all fours squad stretch",
+                "equipment": "body weight",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Start on all fours with your hands directly under your shoulders and your knees directly under your hips. Extend one leg straight back, keeping your knee bent and your foot flexed. Slowly lower your hips towards the ground, feeling a stretch in your quads. Hold this position for 20-30 seconds. Switch legs and repeat the stretch on the other side."
+              },
+              {
+                "name": "arms apart circular toe touch (male)",
+                "equipment": "body weight",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand with your feet shoulder-width apart and arms extended to the sides. Keeping your legs straight, bend forward at the waist and reach down towards your toes with your right hand. As you reach down, simultaneously lift your left leg straight up behind you, maintaining balance. Return to the starting position and repeat the movement with your left hand reaching towards your toes and your right leg lifting up behind you. Continue alternating sides for the desired number of repetitions."
+              },
+              {
+                "name": "assisted lying glutes stretch",
+                "equipment": "assisted",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Lie on your back with your legs extended. Bend your right knee and place your right ankle on your left thigh, just above the knee. Grasp your left thigh with both hands and gently pull it towards your chest. Hold the stretch for 20-30 seconds. Release and repeat on the other side."
+              },
+              {
+                "name": "assisted lying gluteus and piriformis stretch",
+                "equipment": "assisted",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Lie on your back with your legs extended. Bend your right knee and place your right ankle on your left thigh, just above the knee. Grasp your left thigh with both hands and gently pull it towards your chest. Hold the stretch for 20-30 seconds. Release the stretch and repeat on the other side."
+              },
+              {
+                "name": "assisted prone hamstring",
+                "equipment": "assisted",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Lie face down on a mat or bench with your legs fully extended. Have a partner or use a resistance band to secure your ankles. Engage your hamstrings and lift your legs towards your glutes, keeping your knees straight. Pause for a moment at the top, then slowly lower your legs back down to the starting position. Repeat for the desired number of repetitions."
+              }
+            ]
+          },
+          {
+            "day": 2,
+            "body_part": "chest",
+            "pool_size": 5,
+            "exercises": [
+              {
+                "name": "archer push up",
+                "equipment": "body weight",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Start in a push-up position with your hands slightly wider than shoulder-width apart. Extend one arm straight out to the side, parallel to the ground. Lower your body by bending your elbows, keeping your back straight and core engaged. Push back up to the starting position. Repeat on the other side, extending the opposite arm out to the side. Continue alternating sides for the desired number of repetitions."
+              },
+              {
+                "name": "assisted seated pectoralis major stretch with stability ball",
+                "equipment": "assisted",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Sit on a stability ball with your feet flat on the ground and your back straight. Hold a stability ball with both hands and extend your arms straight out in front of you. Slowly lower the stability ball towards your chest, feeling a stretch in your pectoral muscles. Hold the stretch for a few seconds, then slowly return to the starting position. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "band bench press",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Lie flat on a bench with your feet flat on the ground and your back pressed against the bench. Grasp the band handles with an overhand grip, slightly wider than shoulder-width apart. Extend your arms fully, pushing the bands away from your chest. Slowly lower the bands back down to your chest, keeping your elbows at a 90-degree angle. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "band one arm twisting chest press",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Attach the band to a sturdy anchor point at chest height. Stand with your side facing the anchor point and grab the band with one hand. Step away from the anchor point to create tension in the band. Position your feet shoulder-width apart and slightly bend your knees. Bring your hand holding the band across your body, towards the opposite shoulder. While maintaining tension in the band, push your hand forward and away from your body, extending your arm. Slowly return to the starting position and repeat for the desired number of repetitions. Switch sides and repeat the exercise with the other hand."
+              },
+              {
+                "name": "behind head chest stretch",
+                "equipment": "assisted",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand tall with your feet shoulder-width apart. Interlace your fingers behind your head with your elbows pointing outwards. Slowly squeeze your shoulder blades together and push your chest forward. Hold the stretch for 15-30 seconds. Release the stretch and repeat as desired."
+              }
+            ]
+          },
+          {
+            "day": 3,
+            "body_part": "back",
+            "pool_size": 5,
+            "exercises": [
+              {
+                "name": "archer pull up",
+                "equipment": "body weight",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Start by hanging from a pull-up bar with an overhand grip, slightly wider than shoulder-width apart. Engage your core and pull your shoulder blades down and back. As you pull yourself up, bend one arm and bring your elbow towards your side, while keeping the other arm straight. Continue pulling until your chin is above the bar and your bent arm is fully flexed. Lower yourself back down with control, straightening the bent arm and repeating the movement on the other side. Alternate sides with each repetition."
+              },
+              {
+                "name": "back extension on exercise ball",
+                "equipment": "stability ball",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Place the stability ball on the ground and lie face down on top of it, with your hips resting on the ball and your feet against a wall or other stable surface. Position your hands behind your head or crossed over your chest. Engage your core and slowly lift your upper body off the ball, extending your back until your body forms a straight line from your head to your heels. Pause for a moment at the top, then slowly lower your upper body back down to the starting position. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "back lever",
+                "equipment": "body weight",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Start by hanging from a pull-up bar with an overhand grip, hands slightly wider than shoulder-width apart. Engage your core and pull your shoulder blades down and back. Bend your knees and tuck them towards your chest. Slowly lift your legs up, keeping them straight, until your body is parallel to the ground. Hold this position for a few seconds, then slowly lower your legs back down to the starting position. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "back pec stretch",
+                "equipment": "body weight",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand tall with your feet shoulder-width apart. Extend your arms straight out in front of you, parallel to the ground. Cross your arms in front of your body, with your right arm over your left arm. Interlock your fingers and rotate your palms away from your body. Slowly raise your arms up and away from your body, feeling a stretch in your back and chest. Hold the stretch for 15-30 seconds, then release. Repeat on the opposite side."
+              },
+              {
+                "name": "band assisted pull-up",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Attach the band to a pull-up bar or sturdy anchor point. Step onto the band and grip the bar with your palms facing away from you, hands slightly wider than shoulder-width apart. Hang with your arms fully extended, keeping your core engaged and your shoulders down and back. Pull your body up towards the bar by squeezing your shoulder blades together and driving your elbows down towards your hips. Continue pulling until your chin is above the bar, then slowly lower yourself back down to the starting position. Repeat for the desired number of repetitions."
+              }
+            ]
+          },
+          {
+            "day": 4,
+            "body_part": "shoulders",
+            "pool_size": 5,
+            "exercises": [
+              {
+                "name": "band front lateral raise",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand with your feet shoulder-width apart and hold the band in front of your thighs with your palms facing down. Keep your arms straight and lift the band up in front of you until your arms are parallel to the ground. Pause for a moment at the top, then slowly lower the band back down to the starting position. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "band front raise",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand with your feet shoulder-width apart and hold the band in front of your thighs with your palms facing down. Keep your arms straight and slowly raise them forward until they are parallel to the ground. Pause for a moment at the top, then slowly lower your arms back down to the starting position. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "band reverse fly",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Attach the band to a stationary object at chest height. Stand with your feet shoulder-width apart and hold the band with both hands in front of you. Keep your arms straight and lift them out to the sides until they are parallel to the ground. Squeeze your shoulder blades together at the top of the movement. Slowly lower your arms back to the starting position. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "band shoulder press",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand with your feet shoulder-width apart and place the band under your feet. Hold the band with your palms facing forward and raise your hands to shoulder height, elbows bent. Press the band overhead, fully extending your arms. Pause for a moment at the top, then slowly lower the band back to shoulder height. Repeat for the desired number of repetitions."
+              },
+              {
+                "name": "band standing rear delt row",
+                "equipment": "band",
+                "sets": 4,
+                "reps": 8,
+                "instruction_steps": "Stand with your feet shoulder-width apart and place the band under your feet. Hold the band handles with your palms facing each other and your arms extended in front of you. Bend your knees slightly and hinge forward at the hips, keeping your back straight. Pull the band towards your chest, squeezing your shoulder blades together. Pause for a moment at the top, then slowly release the tension and return to the starting position. Repeat for the desired number of repetitions."
+              }
+            ]
+          }
+        ],
+        "sets": 4,
+        "reps": 8,
+        "style": "upper/lower split",
+        "split_repeats": false,
+        "estimated_minutes_per_day": 33.0,
+        "estimate_basis": "warmup 5 min + sets x (reps x 3s + 60s rest) \u2014 heuristic, no per-plan durations in the training data"
+      },
+      "score_basis": "RandomForest class probability (equipment-constrained). Probabilities are model beliefs, not accuracy.",
+      "choice_label": "Primary plan \u2014 follow this one"
+    },
+    "alternatives": []
+  },
+  "version": "2.0"
+}

@@ -53,12 +53,11 @@ def options_workout():
     global _options_cache
     try:
         from ml.options import workout_options
-        key = "workout"
-        if not _options_cache or key not in _options_cache:
-            if _options_cache is None:
-                _options_cache = {}
-            _options_cache[key] = workout_options(rec._workout)
-        return {"success": True, **_options_cache[key]}
+        if _options_cache is None:
+            _options_cache = {}
+        if "workout" not in _options_cache:
+            _options_cache["workout"] = workout_options(rec._meta, rec._workout_model)
+        return {"success": True, **_options_cache["workout"]}
     except Exception:
         return JSONResponse({"success": False, "error": "Could not build options"}, status_code=500)
 
@@ -71,12 +70,10 @@ def options_diet():
     global _options_cache
     try:
         from ml.options import diet_options
-        from ml.data_preparation import prepare_diet_frame
         if _options_cache is None:
             _options_cache = {}
-        # distinct user-facing values come from the diet training frame (small file)
         if "diet" not in _options_cache:
-            _options_cache["diet"] = diet_options(prepare_diet_frame())
+            _options_cache["diet"] = diet_options(rec._nutrition, rec._meta)
         return {"success": True, **_options_cache["diet"]}
     except Exception:
         return JSONResponse({"success": False, "error": "Could not build options"}, status_code=500)
@@ -88,31 +85,42 @@ def options_unified():
     if err is not None:
         return err
     try:
-        from ml.options import workout_options
-        from ml.unified import (GOALS, EQUIPMENT_LABELS, FITNESS_LEVELS,
-                                ACTIVITY_LEVELS, DIET_PREFERENCES, SAFETY_NOTE)
-        w = _options_cache.get("workout") if _options_cache else None
-        if w is None:
-            w = workout_options(rec._workout)
-        # Diet dropdown values come from the unified contract (not the legacy
-        # training frame, which may be absent); recipe courses read live catalog.
-        try:
-            from ml.recipes import prepare_recipe_catalog
-            _r, _ = prepare_recipe_catalog()
-            recipe_courses = sorted(_r["course"].dropna().unique().tolist())
-        except Exception:
-            recipe_courses = []
+        from ml.options import workout_options, diet_options
+        from ml.unified import (GOALS, DIET_GOAL_MAP, GENDERS, FITNESS_LEVELS,
+                                ACTIVITY_LEVELS, INJURIES, DIET_PREFERENCES,
+                                SAFETY_NOTE)
+        global _options_cache
+        if _options_cache is None:
+            _options_cache = {}
+        if "workout" not in _options_cache:
+            _options_cache["workout"] = workout_options(rec._meta, rec._workout_model)
+        if "diet" not in _options_cache:
+            _options_cache["diet"] = diet_options(rec._nutrition, rec._meta)
         d = {"goals": list(GOALS),
-             "allergies": ["Gluten", "Peanuts", "Dairy", "Soy", "Eggs", "Fish"],
-             "recipe_courses": recipe_courses}
+             "goal_diet_keys": DIET_GOAL_MAP,
+             "genders": list(GENDERS),
+             "allergies": _options_cache["diet"]["allergies"],
+             "dietary_preferences": list(DIET_PREFERENCES)}
         return {"success": True,
                 "goals": list(GOALS),
-                "equipment": [{"value": k, "label": v} for k, v in EQUIPMENT_LABELS.items()],
+                "equipment": _options_cache["workout"]["equipment"],
                 "fitness_levels": list(FITNESS_LEVELS),
                 "activity_levels": list(ACTIVITY_LEVELS),
+                "injuries": _options_cache["workout"]["injuries"],
                 "dietary_preferences": list(DIET_PREFERENCES),
+                "defaults": {
+                    "goal": "Muscle Gain",
+                    "genders": list(GENDERS),
+                    "fitness_level": "beginner",
+                    "activity_level": "moderately active",
+                    "injuries": "none",
+                    "dietary_preference": "any",
+                    "available_minutes": _options_cache["workout"]["defaults"]["available_minutes"],
+                    "days_per_week": 4,
+                },
                 "safety_note": SAFETY_NOTE,
-                "workout": w, "diet": d}
+                "workout": _options_cache["workout"],
+                "diet": d}
     except Exception:
         return JSONResponse({"success": False, "error": "Could not build options"}, status_code=500)
 

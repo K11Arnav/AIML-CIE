@@ -1,101 +1,110 @@
-"""Workout tests: primary/alternatives, hard equipment filter, duration check, no fabrication."""
-import json
-
+"""Workout recommender tests: model-driven, equipment-constrained, honest."""
 import pytest
 
-from tests.conftest import recommender_fixture
+from tests.conftest import jsonable
+from tests.conftest import recommender as rec_fixture
 
 
-def test_default_returns_exactly_one_primary_plan(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({})
-    json.dumps(out)
-    assert out["primary"] is not None
+@pytest.fixture()
+def rec(recommender):
+    return recommender
+
+
+PROFILE = {"age": 28, "gender": "Male", "weight_kg": 80, "height_cm": 180,
+           "goal": "Muscle Gain", "equipment": "Full Home Gym",
+           "experience_level": "Beginner", "injury": "None",
+           "available_minutes": 45, "workout_days_per_week": 4}
+
+
+def test_full_profile_consumed_by_model(rec):
+    """Every profile field must reach the model inputs."""
+    out = rec.predict_workout_plan(PROFILE)
+    inputs = out["inputs"]
+    for key in ["Age", "Gender", "Weight_kg", "Height_cm", "Goal",
+                "Equipment", "Experience", "Injury"]:
+        assert key in inputs
+
+    assert inputs["Gender"] == "Male" and inputs["Age"] == 28
+    assert inputs["Goal"] == "Muscle Gain" and inputs["Equipment"] == "Full Home Gym"
+
+
+def test_primary_plan_and_alternatives(rec, tmp_path):
+    out = jsonable(rec.recommend_workout({**PROFILE, "top_n": 3}), tmp_path)
+    assert out["primary"]["choice_label"].startswith("Primary plan")
+    assert 1 <= 1 + len(out["alternatives"]) <= 3
+    all_labeled = [out["primary"]] + out["alternatives"]
+    assert any(a["plan"] != out["primary"]["plan"] for a in out["alternatives"])
+    for p in all_labeled:
+        assert p["plan"] and "model_probability" in p
+    assert out["raw_probabilities"]
+
+
+def test_no_protocolless_alternatives_when_top_n_1(rec):
+    out = rec.recommend_workout(PROFILE)
     assert out["alternatives"] == []
-    assert out["top_n"] == 1
-    assert "ONE plan" in out["usage"]
 
 
-def test_alternative_mode_returns_at_most_requested(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"top_n": 3})
-    assert out["primary"] is not None
-    assert len(out["alternatives"]) <= 2
-    assert 1 + len(out["alternatives"]) <= 3
-    labels = [a["choice_label"] for a in out["alternatives"]]
-    assert all("INSTEAD" in lb for lb in labels)
-    assert "follow this one" in out["primary"]["choice_label"]
-
-
-def test_top_n_range_validated(tmp_path):
-    r = recommender_fixture(tmp_path)
+def test_top_n_validation(rec):
+    for bad in (0, 5):
+        with pytest.raises(ValueError):
+            rec.recommend_workout({**PROFILE, "top_n": bad})
     with pytest.raises(ValueError):
-        r.recommend_workout({"top_n": 0})
-    with pytest.raises(ValueError):
-        r.recommend_workout({"top_n": 5})
-    with pytest.raises(ValueError):
-        r.recommend_workout("not-a-dict")
-    with pytest.raises(ValueError):
-        r.recommend_workout({"available_minutes": "a lot"})
+        rec.recommend_workout("not-a-dict")
 
 
-def test_exact_equipment_filter_excludes_incompatible(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"equipment": ["At Home"], "top_n": 4})
-    assert out["primary"]["equipment"] == "At Home"
-    assert all(a["equipment"] == "At Home" for a in out["alternatives"])
-    assert out["unmet"] == []  # exact value: no warning needed
+def test_equipment_constraint(rec):
+    """Yoga-equipment profiles can never get gym-only plans."""
+    out = rec.recommend_workout({**PROFILE, "equipment": "Yoga Mat"})
+    assert out["constraints"]["equipment"] == "Yoga Mat"
+    from ml.plan_layout import compatible_plans
+    ok = compatible_plans("Yoga Mat")
+    assert out["primary"]["plan"] in ok
 
 
-def test_unsupported_equipment_warns_and_excludes(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"equipment": ["Barbell"], "top_n": 1})
-    assert out["primary"] is None
-    assert out["alternatives"] == []
-    assert any("Barbell" in u or "barbell" in u for u in out["unmet"])
-
-
-def test_mixed_equipment_keeps_only_compatible(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"equipment": ["Full Gym", "Barbell"], "top_n": 4})
-    plans = [out["primary"]] + out["alternatives"]
-    assert all(p["equipment"] == "Full Gym" for p in plans)
-    assert any("barbell" in u for u in out["unmet"])
-
-
-def test_duration_check_on_primary(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"available_minutes": 20, "top_n": 1})
+def test_duration_check_present(rec):
+    out = rec.recommend_workout({**PROFILE, "available_minutes": 10})
     dc = out["primary"]["duration_check"]
-    assert dc["requested"] == 20
-    assert dc["estimated"] is not None  # catalog always has durations
+    assert dc["requested"] == 10 and dc["estimated"] is not None
     assert isinstance(dc["fits"], bool)
-    assert dc["note"]
 
 
-def test_no_duration_requested_states_limitation(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"top_n": 1})
-    assert out["primary"]["duration_check"]["fits"] is None
-    assert "no fit check" in out["primary"]["duration_check"]["note"].lower()
+def test_duration_none_states_no_check(rec):
+    out = rec.recommend_workout({k: v for k, v in PROFILE.items()
+                                 if k != "available_minutes"})
+    dc = out["primary"]["duration_check"]
+    assert dc["fits"] is None and "no fit check" in dc["note"].lower()
 
 
-def test_no_fabrication_all_titles_from_catalog(tmp_path):
-    r = recommender_fixture(tmp_path)
-    out = r.recommend_workout({"top_n": 4})
-    catalog_titles = set(r._workout["title"].unique().tolist())
-    plans = [out["primary"]] + out["alternatives"]
-    assert len(plans) >= 1
-    for p in plans:
-        assert p["program"] in catalog_titles
-        # exercise rows come from the same catalog slice
-        assert len(p["exercises"]) >= 1
-        assert {"exercise", "sets", "reps"} <= set(p["exercises"][0])
-        assert "score_basis" in p
+def test_days_default_note(rec):
+    out = rec.recommend_workout({k: v for k, v in PROFILE.items()
+                                 if k != "workout_days_per_week"})
+    assert out["constraints"]["workout_days_per_week"] == 4  # documented default
+    assert "defaulted" in (out["constraints"].get("note") or "")
 
 
-def test_empty_when_nothing_matches(tmp_path):
-    r = recommender_fixture(tmp_path)
-    r._workout = r._workout.iloc[0:0].copy()
-    out = r.recommend_workout({"goal": "Bodybuilding"})
-    assert out["primary"] is None and out["alternatives"] == []
+def test_invalid_injury_rejected(rec):
+    with pytest.raises(ValueError):
+        rec.recommend_workout({**PROFILE, "injury": "hip"})
+
+
+def test_invalid_equipment_rejected(rec):
+    with pytest.raises(ValueError):
+        rec.recommend_workout({**PROFILE, "equipment": "BARBELL"})
+
+
+def test_invalid_goal_rejected(rec):
+    with pytest.raises(ValueError):
+        rec.recommend_workout({**PROFILE, "goal": "Walk to Strength Door"})
+
+
+def test_exercises_come_from_library(rec):
+    lib_names = set(rec._library["name"])
+    out = rec.recommend_workout({**PROFILE})
+    for day in out["primary"]["layout"]["days"]:
+        for ex in day["exercises"]:
+            assert ex["name"] in lib_names
+
+
+def test_model_quality_reported_not_hidden(rec):
+    out = rec.recommend_workout({**PROFILE})
+    assert "test_accuracy" in out["model_quality"]

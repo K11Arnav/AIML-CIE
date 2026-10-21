@@ -9,9 +9,12 @@ Result x activity factor = maintenance-level daily energy need (goal-neutral:
 no deficit/surplus applied, so no invented prescription).
 """
 ACTIVITY_FACTORS = {
-    "sedentary": 1.2,    # little/no exercise
-    "moderate": 1.55,    # moderate exercise 3-5 days/week
-    "active": 1.725,     # hard exercise 6-7 days/week
+    "sedentary": 1.2,          # little/no exercise
+    "lightly active": 1.375,   # light exercise/sports 1-3 days/week
+    "moderate": 1.55,          # moderate exercise 3-5 days/week
+    "moderately active": 1.55,          # nutrition_dataset alias of moderate
+    "active": 1.725,           # hard exercise 6-7 days/week
+    "very active": 1.725,               # nutrition_dataset alias of active
 }
 DEFAULT_ACTIVITY = "moderate"  # defensible middle when the optional field is omitted
 

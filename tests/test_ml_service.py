@@ -1,85 +1,68 @@
-"""ML service endpoint tests (real artifacts; no network)."""
+"""ML service route tests: options from model artifacts, unified flow."""
 from fastapi.testclient import TestClient
 
 import ml_service.app as svc
-from tests.conftest import diet_fixture  # noqa: F401 (ensures test env parity)
-
-client = TestClient(svc.app)
-
-WORKOUT_PROFILE = {"goal": "Bodybuilding", "experience_level": "Beginner",
-                   "equipment": ["Full Gym"], "available_minutes": 60, "top_n": 2}
-DIET_PROFILE = {"Age": 30, "Gender": "Female", "Weight_kg": 65, "Height_cm": 165,
-                "Severity": "Moderate", "Physical_Activity_Level": "Active",
-                "Daily_Caloric_Intake": 2200, "Cholesterol_mg/dL": 180,
-                "Blood_Pressure_mmHg": 120, "Glucose_mg/dL": 95,
-                "Weekly_Exercise_Hours": 5, "Adherence_to_Diet_Plan": 85,
-                "Dietary_Nutrient_Imbalance_Score": 1.5, "goal": "weight loss",
-                "allergies": [], "dietary_restrictions": [], "top_k": 3}
 
 
-def test_health_ok():
-    r = client.get("/health")
-    assert r.status_code == 200
-    assert r.json()["status"] == "ok"
+def _client(recommender):
+    svc._recommender = recommender
+    svc._load_error = None
+    return TestClient(svc.app)
 
 
-def test_workout_endpoint_real_results():
-    r = client.post("/recommendations/workout", json=WORKOUT_PROFILE)
-    assert r.status_code == 200
+RAW = {"age": 30, "height_cm": 165, "weight_kg": 65, "gender": "Female",
+       "goal": "Muscle Gain", "equipment": "home dumbbells",
+       "workout_duration_minutes": 45, "fitness_level": "beginner",
+       "activity_level": "moderately active", "workout_days_per_week": 4,
+       "injuries_or_limitations": "none", "dietary_preference": "any",
+       "allergies": []}
+
+
+def test_health_ok(recommender):
+    c = _client(recommender)
+    r = c.get("/health")
+    assert r.status_code == 200 and r.json()["status"] == "ok"
+
+
+def test_options_content(recommender):
+    c = _client(recommender)
+    o = c.get("/options/unified").json()
+    assert o["success"] is True
+    assert "Muscle Gain" in o["goals"]
+    assert {eq["value"] for eq in o["equipment"]} == \
+        {"bodyweight only", "yoga mat", "home dumbbells", "full home gym", "gym membership"}
+    assert set(o["injuries"]) == {"none", "knee", "ankle", "shoulder", "back"}
+    assert len(o["activity_levels"]) == 4
+
+
+def test_unified_success(recommender):
+    c = _client(recommender)
+    r = c.post("/recommendations/unified", json=RAW)
+    assert r.status_code == 200, r.text
     body = r.json()
     assert body["success"] is True
-    assert body["primary"] is not None
-    assert "exercise" in body["primary"]["exercises"][0]
-    assert 1 + len(body["alternatives"]) <= 2  # top_n caps total plans
-    assert "ONE plan" in body["usage"]
+    assert body["workout"]["primary"]["plan"]
+    assert body["diet"]["predicted"]["Daily Calorie Target"] > 0
 
 
-def test_diet_endpoint_real_results():
-    r = client.post("/recommendations/diet", json=DIET_PROFILE)
-    assert r.status_code == 200
-    body = r.json()
-    assert body["success"] is True
-    assert body["diet_category"]["diet_category"] in ("Balanced", "Low_Carb", "Low_Sodium")
-    assert len(body["items"]) == 3
-    assert body["allergen_data"] == "unavailable"
-    assert "missing_nutrition" in body["items"][0]
-
-
-def test_diet_allergy_empty_with_warning():
-    """Indian catalog has no allergen data: no fallback to branded products."""
-    prof = dict(DIET_PROFILE, allergies=["Peanuts"])
-    r = client.post("/recommendations/diet", json=prof)
-    assert r.status_code == 200
-    body = r.json()
-    assert body["success"] is True
-    assert body["items"] == []
-    assert "allergen_warning" in body
-    assert body["catalog_used"]["source_dataset"].startswith("indian_catalog")
-
-
-def test_invalid_input_400_not_500():
-    r = client.post("/recommendations/diet", json={"top_k": 999})
+def test_unified_invalid_backend_400(recommender):
+    c = _client(recommender)
+    r = c.post("/recommendations/unified", json={**RAW, "goal": "bogus goal"})
     assert r.status_code == 400
-    assert r.json()["success"] is False
-    r = client.post("/recommendations/workout", json={"top_n": 0})
+    assert "goal" in r.json()["error"].lower()
+
+
+def test_unified_non_object_400(recommender):
+    c = _client(recommender)
+    r = c.post("/recommendations/unified", json=[1, 2])
     assert r.status_code == 400
 
 
-def test_non_object_body_400():
-    r = client.post("/recommendations/diet", json=[1, 2, 3])
-    assert r.status_code == 400
-
-
-def test_missing_artifacts_503(monkeypatch, tmp_path):
-    import ml_service.app as app_mod
-    monkeypatch.setattr(app_mod, "_recommender", None)
-    monkeypatch.setattr(app_mod, "_load_error", None)
-    monkeypatch.setattr(app_mod, "ARTIFACTS_DIR", tmp_path)
-    r = client.get("/health")
+def test_load_failure_reported(monkeypatch, tmp_path):
+    monkeypatch.setenv("ARTIFACTS_DIR", str(tmp_path / "nonexistent"))
+    import importlib
+    importlib.reload(svc)
+    c = TestClient(svc.app)
+    r = c.get("/health")
     assert r.status_code == 503
-    assert r.json()["status"] == "unavailable"
-    # restore for other tests
-    monkeypatch.setattr(app_mod, "ARTIFACTS_DIR",
-                        __import__("pathlib").Path("artifacts").resolve())
-    app_mod._recommender = None
-    app_mod._load_error = None
+    assert "Missing artifacts" in r.json()["reason"]

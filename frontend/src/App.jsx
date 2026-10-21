@@ -60,8 +60,8 @@ export default function App() {
   const [opts, setOpts] = useState({ state: "loading" });
   const [f, setF] = useState({
     age: "30", height_cm: "165", weight_kg: "65", gender: "Female",
-    goal: "weight loss", equipment: "dumbbells", workout_duration_minutes: "45",
-    fitness_level: "beginner", activity_level: "moderate", workout_days_per_week: "4",
+    goal: "Muscle Gain", equipment: "home dumbbells", workout_duration_minutes: "45",
+    fitness_level: "beginner", activity_level: "moderately active", workout_days_per_week: "4",
     injuries_or_limitations: "none", dietary_preference: "any", allergies: [],
   });
   const [res, setRes] = useState({ state: "idle" });
@@ -103,10 +103,20 @@ export default function App() {
   const set = (key) => (e) => setF((s) => ({ ...s, [key]: e.target.value }));
   const setV = (key) => (v) => setF((s) => ({ ...s, [key]: v }));
   const eqOpts = (opts.data?.equipment || [
-    { value: "bodyweight", label: "Bodyweight / no equipment (At Home)" },
-    { value: "dumbbells", label: "Dumbbells / basic equipment (Dumbbell Only)" },
-    { value: "full gym", label: "Full gym (Full Gym)" },
+    { value: "bodyweight only", label: "Bodyweight / no equipment" },
+    { value: "home dumbbells", label: "Home dumbbells / kettlebell" },
+    { value: "full home gym", label: "Full home gym (barbell + rack)" },
+    { value: "gym membership", label: "Gym membership (machines, cables, barbell)" },
+    { value: "yoga mat", label: "Yoga mat (mobility, floor work)" },
   ]).map((o) => ({ value: o.value, label: o.label || o.value }));
+  const goalOpts = (opts.data.goals || ["Weight Loss", "Muscle Gain", "General Health"])
+    .map((v) => ({ value: v, label: v }));
+  const actOpts = (opts.data.activity_levels || ["sedentary", "lightly active", "moderately active", "very active"])
+    .map((v) => ({ value: v, label: v.replace(/\b\w/g, (c) => c.toUpperCase()) }));
+  const injOpts = (opts.data.injuries || ["none", "knee", "ankle", "shoulder", "back"])
+    .map((v) => ({ value: v, label: v === "none" ? "None" : v.replace(/\b\w/g, (c) => c.toUpperCase()) }));
+  const prefOpts = (opts.data.dietary_preferences || ["any", "omnivore", "vegetarian", "vegan"])
+    .map((v) => ({ value: v, label: v === "any" ? "Any" : v.replace(/\b\w/g, (c) => c.toUpperCase()) }));
 
   return (
     <div className="wrap">
@@ -129,7 +139,7 @@ export default function App() {
               <Select label="Gender" value={f.gender} onChange={setV("gender")} options={["Female", "Male"].map((v) => ({ value: v, label: v }))} />
             </Field>
             <Field label="Goal">
-              <Select label="Goal" value={f.goal} onChange={setV("goal")} options={(opts.data.goals || ["weight loss", "muscle gain", "general fitness"]).map((v) => ({ value: v, label: v }))} />
+              <Select label="Goal" value={f.goal} onChange={setV("goal")} options={goalOpts} />
             </Field>
             <Field label="Equipment you have">
               <Select label="Equipment" value={f.equipment} onChange={setV("equipment")} options={eqOpts} />
@@ -139,14 +149,14 @@ export default function App() {
               <Select label="Fitness level" value={f.fitness_level} onChange={setV("fitness_level")} options={["beginner", "intermediate", "advanced"].map((v) => ({ value: v, label: v }))} />
             </Field>
             <Field label="Activity level">
-              <Select label="Activity level" value={f.activity_level} onChange={setV("activity_level")} options={["sedentary", "moderate", "active"].map((v) => ({ value: v, label: v }))} />
+              <Select label="Activity level" value={f.activity_level} onChange={setV("activity_level")} options={actOpts} />
             </Field>
             <Field label="Workout days per week"><input value={f.workout_days_per_week} onChange={set("workout_days_per_week")} inputMode="numeric" placeholder="1–7" /></Field>
-            <Field label="Injuries / limitations (or “none”)">
-              <input value={f.injuries_or_limitations} onChange={set("injuries_or_limitations")} placeholder="none" />
+            <Field label="Injury / limitation focus">
+              <Select label="Injuries or limitations" value={f.injuries_or_limitations} onChange={setV("injuries_or_limitations")} options={injOpts} />
             </Field>
             <Field label="Dietary preference">
-              <Select label="Dietary preference" value={f.dietary_preference} onChange={setV("dietary_preference")} options={["any", "vegetarian", "non vegetarian"].map((v) => ({ value: v, label: v }))} />
+              <Select label="Dietary preference" value={f.dietary_preference} onChange={setV("dietary_preference")} options={prefOpts} />
             </Field>
             <div className="full">
               <MultiSelect legend="Allergies (hard exclusions)" options={ALLERGIES.map((v) => ({ value: v, label: v }))} selected={f.allergies} onChange={setV("allergies")} />
@@ -163,110 +173,116 @@ export default function App() {
 
 function UnifiedResults({ data }) {
   const diet = data.diet, workout = data.workout;
-  const hasFoods = (diet.items || []).length > 0 || (diet.recipes || []).length > 0;
   const allergyNote = diet.allergen_warning || null;
+  const rq = workout.model_quality || {};
   return (
     <div>
       <p className="meta">BMI {data.profile?.bmi}</p>
       <p className="meta">{data.safety_note}</p>
 
       <h2>Workout plan</h2>
-      <p className="meta">{workout.method} · {workout.n_candidates ?? 0} compatible programs</p>
+      <p className="meta">Model: RandomForest classifier on smartfit_workout_dataset.csv (test accuracy {rq.test_accuracy ?? "–"}, dummy baseline {rq.dummy_accuracy ?? "–"}). Every profile field you submit is a model feature.</p>
       {workout.unmet?.length > 0 && <p className="warn">Notes: {workout.unmet.join("; ")}</p>}
-      {!workout.primary && <p className="warn">No compatible program — try a different equipment or duration.</p>}
+      {!workout.primary && <p className="warn">No compatible plan — try different equipment.</p>}
       {workout.primary && <PlanCard p={workout.primary} heading={workout.primary.choice_label || "Recommended plan"} />}
+      {(workout.alternatives || []).map((p, i) => <PlanCard key={p.plan} p={p} heading={p.choice_label || `Alternative ${i + 1}`} />)}
 
       <h2>Diet recommendations</h2>
-      <CalorieCard target={data.daily_calorie_target} />
+      <CalorieCard target={data.daily_calorie_target_formula} predicted={diet.predicted} modelQuality={diet.model_quality_area} />
       {allergyNote && <p className="warn">{allergyNote}</p>}
-      <h3>Foods you can eat</h3>
-      {!hasFoods && <p>No matching foods are available for the selected preferences and restrictions.</p>}
-      {diet.items?.map((item) => (
-        <FoodCard key={item.rank + (item.product_name || "")} item={item} goal={data.diet_goal} />
-      ))}
-      {(diet.recipes || []).slice(0, 10).map((rec, i) => (
-        <RecipeCard key={rec.name + i} rec={rec} />
-      ))}
+      {diet.meals && <MealsCard meals={diet.meals} />}
+      <h3>Foods ranked for your goal ({data.diet_goal})</h3>
+      {(diet.items || []).length === 0 && <p>No matching foods (check allergy warnings above).</p>}
+      {(diet.items || []).map((item) => <FoodCard key={item.rank + (item.product_name || "")} item={item} />)}
     </div>
   );
 }
 
-/** Daily calorie target: calculated estimate, never a measured fact.
- *  Falls back to an explicit unavailable message instead of a made-up number. */
-function CalorieCard({ target }) {
-  if (!target || !(target.kcal_per_day > 0)) {
-    return (
-      <div className="card">
-        <h3>Daily calorie target unavailable</h3>
-        <p className="meta">The target could not be determined reliably for this profile, so none is shown rather than a fabricated number.</p>
-      </div>
-    );
-  }
+/** Model-predicted macros + formula-based daily target, clearly separated. */
+function CalorieCard({ target, predicted, modelQuality }) {
+  const mae = predicted ? (modelQuality?.mae?.["Daily Calorie Target"] ?? "–") : null;
   return (
     <div className="card">
-      <h3>Daily calorie target: {target.kcal_per_day} kcal/day</h3>
-      <p className="meta">{target.method}.</p>
-      {target.activity_assumed && <p className="meta">Activity level not provided — assumed “{target.activity_level_used}”. Set it on the form for a better estimate.</p>}
-      <p className="meta">{target.disclaimer}</p>
+      <h3>Model-predicted targets (RF on nutrition_dataset)</h3>
+      {predicted
+        ? <p className="meta"><b>{predicted["Daily Calorie Target"]} kcal/day</b> · Protein {predicted.Protein} g · Carbs {predicted.Carbohydrates} g · Fat {predicted.Fat} g (MAE±{mae} kcal on held-out data)</p>
+        : <p className="meta">No macro prediction available.</p>}
+      <h3>Formula estimate (Mifflin-St Jeor)</h3>
+      {target && target.kcal_per_day > 0
+        ? <p className="meta">{target.kcal_per_day} kcal/day — {target.method}.{target.activity_assumed ? ` Activity level not provided — assumed “${target.activity_level_used}”, set it for a better estimate.` : ""}</p>
+        : <p className="meta">Formula estimate unavailable for this profile.</p>}
+      <p className="meta">{target?.disclaimer}</p>
     </div>
   );
 }
 
+/** Meal suggestions: retrieved rows from nutrition_dataset.csv, never generated. */
+function MealsCard({ meals }) {
+  const s = meals.suggestions || {};
+  return (
+    <div className="card">
+      <h3>Day of meals (retrieved, not generated)</h3>
+      <p className="meta">{meals.selection_basis} Matching preference rows: {meals.matches}.</p>
+      <ul>
+        {Object.entries(s).map(([k, v]) => (
+          <li key={k}><b>{k.replace(" Suggestion", "")}:</b> {v ?? "–"}</li>
+        ))}
+      </ul>
+      <p className="meta">Row context: {MealsCard.ctx(meals)}</p>
+      <p className="meta">Suggestions are not allergy-screened — verify ingredients yourself.</p>
+    </div>
+  );
+}
+MealsCard.ctx = (meals) => {
+  const r = meals.row_context || {};
+  return `${r["Dietary Preference"] ?? "–"} · ${r["Fitness Goal"] ?? "–"} · ${r["Daily Calorie Target"] ?? "–"} kcal row target`;
+};
+
 /** Food card: per-100 g dataset values only. No serving sizes, ingredients, or
- *  dietary-category labels exist in the food catalog, so the card says so
- *  instead of inventing them. No preparation times are shown. */
-function FoodCard({ item, goal }) {
-  const basis = item.explanation?.serving_basis || "per 100 g";
+ *  allergen flags exist in the food catalog, so the card says so instead of
+ *  inventing them. */
+function FoodCard({ item }) {
+  const basis = item.serving_basis || "per 100 g";
   const g = (v) => (v ?? "–") + (v == null ? "" : "g");
   return (
     <div className="card">
-      <h3>#{item.rank} {item.product_name || "Unnamed product"} <small>{item.food_type || ""}</small></h3>
-      <p className="meta"><b>{item.energy_kcal ?? "–"} kcal</b> {basis} (dataset value — no serving-size data, nothing scaled)</p>
+      <h3>#{item.rank} {item.product_name || "Unnamed food"}</h3>
+      <p className="meta"><b>{item.energy_kcal ?? "–"} kcal</b> {basis} (dataset value — nothing scaled)</p>
       <p className="meta">Protein {g(item.proteins_100g)} · Carbs {g(item.carbs_100g)} · Fat {g(item.fat_100g)} · Fibre {g(item.fiber_100g)} ({basis}; – = unavailable, never zero)</p>
-      <p className="meta">Ingredients: not listed in the food dataset — the name alone doesn’t define ingredients.</p>
       {item.missing_nutrition?.length > 0 && <p className="warn">Unavailable for this food: {item.missing_nutrition.join(", ")} (shown as –)</p>}
-      <p className="meta">Why for your goal ({goal}): {item.why}</p>
-    </div>
-  );
-}
-
-/** Recipe card: real ingredient list + dataset diet label. The recipe dataset
- *  has no nutrient or serving data, so none is shown. No prep/cook times. */
-function RecipeCard({ rec }) {
-  const ings = String(rec.ingredients || "").split(",").map((s) => s.trim()).filter(Boolean);
-  return (
-    <div className="card">
-      <h3>{rec.name} <small>{[rec.diet, rec.course].filter(Boolean).join(" · ")}</small></h3>
-      {rec.diet && <p className="meta">Dietary category (dataset label): {rec.diet}</p>}
-      <p className="meta">Ingredients: {ings.length > 0 ? ings.join(", ") : "not listed"}</p>
-      {rec.unmatched_ingredients?.length > 0 && <p className="meta">Unresolved: {rec.unmatched_ingredients.join("; ")}</p>}
-      <p className="meta">Nutrition: unavailable — the recipe dataset has no nutrient values.</p>
-      <p className="meta">Ingredient coverage {rec.ingredient_coverage}{rec.state ? ` · ${rec.state}${rec.region ? `, ${rec.region}` : ""}` : ""}</p>
-      {rec.compatibility_status !== "compatible_with_known_preferences" && rec.explanation && (
-        <p className="meta">{rec.explanation}</p>
-      )}
+      <p className="meta">{item.rank_reason}</p>
     </div>
   );
 }
 
 function PlanCard({ p, heading }) {
+  const dc = p.duration_check || {};
   return (
     <div className="card">
       <p className="choice">{heading}</p>
-      <h3>{p.program}</h3>
-      <p className="meta">{p.goal} · {p.level} · {p.equipment} · {p.time_per_workout ?? "–"} min · {p.n_exercises_listed} sessions listed</p>
-      <p className="meta">Duration: {p.duration_check?.estimated != null ? `~${p.duration_check.estimated} min` : "cannot be estimated from the data"} — {p.duration_check?.note}</p>
+      <h3>{p.plan}</h3>
+      <p className="meta">{p.style} · {p.goal} · {p.experience_level} · {p.equipment} · {p.workout_days_per_week} days/week · {p.sets}×{p.reps ?? "timed"} scheme</p>
+      <p className="meta">Model probability: {p.model_probability} (equipment-constrained; model belief, not accuracy)</p>
+      <p className="meta">Duration: {dc.estimated != null ? `~${dc.estimated} min/session (heuristic)` : "cannot be estimated"} — {dc.note}</p>
+      <p className="meta">Session layout from datasets/exercises.json (deterministic mapping in ml/plan_layout.py; first {EX_PER_DAY} compatible exercises per day).</p>
       <table>
-        <thead><tr><th>Exercise</th><th>Sets</th><th>Reps</th><th>Intensity</th><th>Wk</th><th>Day</th></tr></thead>
+        <thead><tr><th>Day</th><th>Focus</th><th>Exercise</th><th>Sets</th><th>Reps</th></tr></thead>
         <tbody>
-          {p.exercises.map((x, i) => (
-            <tr key={i}><td>{x.exercise}</td><td>{x.sets ?? "–"}</td><td>{x.reps ?? "–"}</td><td>{x.intensity ?? "–"}</td><td>{x.week ?? "–"}</td><td>{x.day ?? "–"}</td></tr>
-          ))}
+          {(p.layout?.days || []).map((d) => d.exercises.map((x, i) => (
+            <tr key={`${d.day}-${i}`}>
+              <td>{d.day}</td>
+              <td>{d.body_part}</td>
+              <td>{x.name}</td>
+              <td>{x.sets ?? "–"}</td>
+              <td>{x.reps ?? "timed"}</td>
+            </tr>
+          )))}
         </tbody>
       </table>
     </div>
   );
 }
+const EX_PER_DAY = 5;
 
 function Result({ state, render }) {
   if (state.state === "idle") return null;

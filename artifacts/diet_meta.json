@@ -1,111 +1,47 @@
 {
-  "target": "Diet_Recommendation",
-  "target_distribution": {
-    "Balanced": 426,
-    "Low_Sodium": 316,
-    "Low_Carb": 258
+  "targets": [
+    "Daily Calorie Target",
+    "Protein",
+    "Carbohydrates",
+    "Fat"
+  ],
+  "features": {
+    "numeric": [
+      "Age",
+      "Height",
+      "Weight"
+    ],
+    "categorical": [
+      "Gender",
+      "Activity Level",
+      "Fitness Goal",
+      "Dietary Preference"
+    ]
   },
-  "accuracy": 0.39,
-  "f1_macro": 0.3682,
-  "f1_weighted": 0.3865,
-  "dummy_accuracy": 0.38,
-  "n_train": 800,
-  "n_test": 200,
-  "features_numeric": [
-    "Age",
-    "Weight_kg",
-    "Height_cm",
-    "BMI",
-    "Daily_Caloric_Intake",
-    "Cholesterol_mg/dL",
-    "Blood_Pressure_mmHg",
-    "Glucose_mg/dL",
-    "Weekly_Exercise_Hours",
-    "Adherence_to_Diet_Plan",
-    "Dietary_Nutrient_Imbalance_Score"
-  ],
-  "features_categorical": [
-    "Gender",
-    "Severity",
-    "Physical_Activity_Level",
-    "Dietary_Restrictions",
-    "Allergies",
-    "Preferred_Cuisine"
-  ],
-  "excluded": [
-    "Patient_ID",
-    "Disease_Type (target proxy)"
-  ],
-  "feature_importance": [
-    {
-      "feature": "Cholesterol_mg/dL",
-      "importance": 0.07910924950703033
+  "metrics": {
+    "Daily Calorie Target": {
+      "mae": 101.069,
+      "r2": 0.908,
+      "baseline_mae": 370.889
     },
-    {
-      "feature": "Weekly_Exercise_Hours",
-      "importance": 0.0777458737669044
+    "Protein": {
+      "mae": 12.454,
+      "r2": 0.786,
+      "baseline_mae": 30.369
     },
-    {
-      "feature": "Glucose_mg/dL",
-      "importance": 0.07760697217868537
+    "Carbohydrates": {
+      "mae": 22.614,
+      "r2": 0.734,
+      "baseline_mae": 49.979
     },
-    {
-      "feature": "Adherence_to_Diet_Plan",
-      "importance": 0.07755559745413587
-    },
-    {
-      "feature": "Daily_Caloric_Intake",
-      "importance": 0.07626373770067837
-    },
-    {
-      "feature": "Weight_kg",
-      "importance": 0.06941271053983787
-    },
-    {
-      "feature": "BMI",
-      "importance": 0.06883935392513528
-    },
-    {
-      "feature": "Blood_Pressure_mmHg",
-      "importance": 0.06822454909218646
-    },
-    {
-      "feature": "Age",
-      "importance": 0.06779510684372919
-    },
-    {
-      "feature": "Dietary_Nutrient_Imbalance_Score",
-      "importance": 0.06730976435837627
-    },
-    {
-      "feature": "Height_cm",
-      "importance": 0.06313933396863522
-    },
-    {
-      "feature": "Preferred_Cuisine",
-      "importance": 0.04223294652587487
-    },
-    {
-      "feature": "Dietary_Restrictions",
-      "importance": 0.03772991338097913
-    },
-    {
-      "feature": "Physical_Activity_Level",
-      "importance": 0.03476219478384388
-    },
-    {
-      "feature": "Severity",
-      "importance": 0.03458282921663702
-    },
-    {
-      "feature": "Allergies",
-      "importance": 0.03392271933876087
-    },
-    {
-      "feature": "Gender",
-      "importance": 0.023767147418569654
+    "Fat": {
+      "mae": 6.488,
+      "r2": 0.704,
+      "baseline_mae": 12.111
     }
-  ],
-  "goal_is_not_a_feature": true,
-  "disclaimer": "Predicted category is a model output, not a medical diagnosis; it is predicted from the health profile only, not the user's goal."
+  },
+  "train_rows": 398,
+  "test_rows": 100,
+  "data_source": "datasets/nutrition_dataset.csv",
+  "disclaimer": "Model prediction from profile only \u2014 informational, not medical advice."
 }

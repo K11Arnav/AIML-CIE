@@ -82,23 +82,27 @@ function validateUnified(p) {
   if (p.weight_kg < 20 || p.weight_kg > 300) return "weight_kg must be between 20 and 300";
   const norm = (v) => String(v ?? "").trim().toLowerCase();
   if (!["female", "male"].includes(norm(p.gender))) return "gender must be one of: Female, Male";
-  if (!["weight loss", "muscle gain", "general fitness"].includes(norm(p.goal)))
-    return "goal must be one of: weight loss, muscle gain, general fitness";
-  if (!["bodyweight", "dumbbells", "full gym"].includes(norm(p.equipment)))
-    return "equipment must be one of: bodyweight, dumbbells, full gym";
+  const GOALS = ["weight loss", "muscle gain", "general health", "strength",
+    "endurance", "tone up", "powerlifting", "flexibility", "crossfit",
+    "athletic performance", "marathon training"];
+  if (!GOALS.includes(norm(p.goal)))
+    return `goal must be one of: ${GOALS.join(", ")}`;
+  const EQUIPMENT = ["bodyweight only", "yoga mat", "home dumbbells", "full home gym", "gym membership"];
+  if (!EQUIPMENT.includes(norm(p.equipment)))
+    return `equipment must be one of: ${EQUIPMENT.join(", ")}`;
   if (p.workout_duration_minutes === undefined || typeof p.workout_duration_minutes !== "number" || !(p.workout_duration_minutes > 0))
     return "workout_duration_minutes must be a positive number";
   if (p.fitness_level !== undefined && !["beginner", "intermediate", "advanced"].includes(norm(p.fitness_level)))
     return "fitness_level must be one of: beginner, intermediate, advanced";
-  if (p.activity_level !== undefined && !["sedentary", "moderate", "active"].includes(norm(p.activity_level)))
-    return "activity_level must be one of: sedentary, moderate, active";
+  if (p.activity_level !== undefined && !["sedentary", "lightly active", "moderately active", "very active"].includes(norm(p.activity_level)))
+    return "activity_level must be one of: sedentary, lightly active, moderately active, very active";
   if (p.workout_days_per_week !== undefined && (!Number.isInteger(p.workout_days_per_week) || p.workout_days_per_week < 1 || p.workout_days_per_week > 7))
     return "workout_days_per_week must be an integer between 1 and 7";
-  if (p.dietary_preference !== undefined && !["any", "vegetarian", "non vegetarian"].includes(norm(p.dietary_preference)))
-    return "dietary_preference must be one of: any, vegetarian, non vegetarian";
+  if (p.dietary_preference !== undefined && !["any", "omnivore", "vegetarian", "vegan"].includes(norm(p.dietary_preference)))
+    return "dietary_preference must be one of: any, omnivore, vegetarian, vegan";
   if (p.allergies !== undefined && !Array.isArray(p.allergies)) return "allergies must be an array";
-  if (p.injuries_or_limitations !== undefined && typeof p.injuries_or_limitations !== "string")
-    return "injuries_or_limitations must be a string";
+  if (p.injuries_or_limitations !== undefined && !["none", "knee", "ankle", "shoulder", "back"].includes(norm(p.injuries_or_limitations)))
+    return "injuries_or_limitations must be one of: none, knee, ankle, shoulder, back";
   return null;
 }
 
@@ -116,21 +120,24 @@ function validateDiet(p) {
   if (!p || typeof p !== "object" || Array.isArray(p)) return "Request body must be a JSON object";
   if (p.top_k !== undefined && (!Number.isInteger(p.top_k) || p.top_k < 1 || p.top_k > 50))
     return "top_k must be an integer between 1 and 50";
-  for (const f of ["Age", "Weight_kg", "Height_cm"]) {
+  for (const f of ["age", "height_cm", "weight_kg", "Height_cm", "Weight_kg", "Age"]) {
     if (p[f] !== undefined && (typeof p[f] !== "number" || !(p[f] > 0))) return `${f} must be a positive number`;
   }
-  for (const f of ["allergies", "dietary_restrictions"]) {
-    if (p[f] !== undefined && !Array.isArray(p[f])) return `${f} must be an array`;
+  for (const f of ["Activity Level", "activity_level"]) {
+    if (p[f] !== undefined && !["Sedentary", "Lightly Active", "Moderately Active", "Very Active", "sedentary", "lightly active", "moderately active", "very active"].includes(String(p[f]).trim().toLowerCase()))
+      return "activity_level must be one of: Sedentary, Lightly Active, Moderately Active, Very Active";
   }
-  // Recipe options (synced with indian_food.csv via GET /api/options/diet)
-  if (p.course !== undefined && typeof p.course !== "string")
-    return "course must be a string";
-  if (p.course !== undefined && !["", "any", "main course", "dessert", "snack", "starter"].includes(p.course.trim().toLowerCase()))
-    return "course must be one of: any, main course, dessert, snack, starter";
-  if (p.diet_preference !== undefined && !["any", "vegetarian", "non vegetarian"].includes(String(p.diet_preference).trim().toLowerCase()))
-    return "diet_preference must be one of: any, vegetarian, non vegetarian";
-  if (p.max_time_min !== undefined && (typeof p.max_time_min !== "number" || !(p.max_time_min > 0)))
-    return "max_time_min must be a positive number";
+  if (p.allergies !== undefined && !Array.isArray(p.allergies)) return "allergies must be an array";
+  if (p.Dietary_Preference !== undefined || p.dietary_preference !== undefined) {
+    const pref = String(p.Dietary_Preference ?? p.dietary_preference).trim().toLowerCase();
+    if (!["omnivore", "vegetarian", "vegan", "any"].includes(pref))
+      return "dietary_preference must be one of: Omnivore, Vegetarian, Vegan";
+  }
+  if (p.goal !== undefined) {
+    const g = String(p.goal).trim().toLowerCase();
+    if (!["weight loss", "muscle", "balanced"].includes(g))
+      return "goal must be one of: weight loss, muscle, balanced";
+  }
   return null;
 }
 

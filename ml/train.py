@@ -1,204 +1,231 @@
-"""Train entry point: prepare data, train diet RF (+baseline), fit KNN, save artifacts, report.
+"""Train all models from the five current datasets/ files only. No other data.
 
-Usage:  python -m ml.train
+Outputs (artifacts/):
+  workout_model.joblib   RF classifier: 8 profile features -> plan class
+  diet_model.joblib      RF regressor: profile -> calorie target + macros
+  knn.joblib             scaled KNN bundle over the Anuvaad food catalog
+  food_catalog.csv       Anuvaad per-100g catalog
+  nutrition_catalog.csv  cleaned nutrition rows (macros + meal suggestions)
+  exercise_library.json  slim exercise library from exercises.json
+  meta.json / diet_meta.json
+
+Every materialized number (rows, cleaning counts, metrics, baselines) is
+written to reports/ so results are auditable. Old boostcamp program data and
+the missing diet/healthy-foods files are fully retired.
 """
 import json
-from pathlib import Path
 
-import joblib
+import numpy as np
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import SimpleImputer
+from sklearn.dummy import DummyClassifier, DummyRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import (accuracy_score, f1_score, mean_absolute_error,
+                             r2_score)
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from .config import (ARTIFACTS_DIR, REPORTS_DIR, RANDOM_STATE, TEST_SIZE,
-                     DIET_NUMERIC, DIET_CATEGORICAL, DIET_TARGET, KNN_NUTRITION_COLS)
-from .data_preparation import (prepare_diet_frame, prepare_food_catalog,
-                               prepare_indian_catalog, prepare_workout_catalog,
-                               diet_features)
+                     DIET_FEATURE_CATEGORICAL, DIET_FEATURE_NUMERIC,
+                     DIET_TARGETS, KNN_NUTRITION_COLS,
+                     WORKOUT_FEATURE_CATEGORICAL, WORKOUT_FEATURE_NUMERIC,
+                     WORKOUT_TARGET)
+from .data_preparation import (load_exercise_library, prepare_food_catalog,
+                               prepare_nutrition_frame, prepare_workout_frame,
+                               survey_values)
 from .evaluation import classification_metrics
+from .plan_layout import PLAN_LAYOUTS
+
+WORKOUT_PREPROCESS = ColumnTransformer(
+    [("num", "passthrough", WORKOUT_FEATURE_NUMERIC),
+     ("cat", OneHotEncoder(handle_unknown="ignore"), WORKOUT_FEATURE_CATEGORICAL)])
+DIET_PREPROCESS = ColumnTransformer(
+    [("num", "passthrough", DIET_FEATURE_NUMERIC),
+     ("cat", OneHotEncoder(handle_unknown="ignore"), DIET_FEATURE_CATEGORICAL)])
 
 
-def build_diet_pipeline(num_cols, cat_cols) -> Pipeline:
-    num = Pipeline([("imputer", SimpleImputer(strategy="median"))])
-    cat = Pipeline([("imputer", SimpleImputer(strategy="most_frequent")),
-                    ("onehot", OneHotEncoder(handle_unknown="ignore"))])
-    pre = ColumnTransformer([("num", num, num_cols), ("cat", cat, cat_cols)])
-    clf = RandomForestClassifier(n_estimators=200, max_depth=None, min_samples_leaf=2,
-                                 class_weight="balanced", random_state=RANDOM_STATE, n_jobs=-1)
-    return Pipeline([("preprocess", pre), ("clf", clf)])
-
-
-def train_diet(df: pd.DataFrame):
-    X, y = diet_features(df)
-    num_cols = [c for c in DIET_NUMERIC if c in X.columns]
-    cat_cols = [c for c in DIET_CATEGORICAL if c in X.columns]
-    strat = y if y.value_counts().min() >= 2 else None
+def train_workout_classifier(df: pd.DataFrame) -> tuple[dict, dict]:
+    """RF classifier on smartfit_workout_dataset.csv (profile -> plan)."""
+    X, y = df[WORKOUT_FEATURE_NUMERIC + WORKOUT_FEATURE_CATEGORICAL], df[WORKOUT_TARGET]
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=TEST_SIZE,
-                                          random_state=RANDOM_STATE, stratify=strat)
-    model = build_diet_pipeline(num_cols, cat_cols)
-    model.fit(Xtr, ytr)
-    dummy = Pipeline([("preprocess", build_diet_pipeline(num_cols, cat_cols).named_steps["preprocess"]),
-                      ("clf", DummyClassifier(strategy="stratified", random_state=RANDOM_STATE))])
-    dummy.fit(Xtr, ytr)
-    labels = sorted(y.unique().tolist())
-    m_rf = classification_metrics(yte, model.predict(Xte), labels)
-    m_du = classification_metrics(yte, dummy.predict(Xte), labels)
-    info = {"random_forest": m_rf, "dummy_stratified": m_du,
-            "n_train": len(Xtr), "n_test": len(Xte),
-            "features_numeric": num_cols, "features_categorical": cat_cols,
-            "excluded": ["Patient_ID", "Disease_Type (target proxy)"],
-            "target_distribution": y.value_counts().to_dict(),
-            "feature_importance": _aggregate_importance(model, num_cols, cat_cols)}
-    return model, info
+                                          random_state=RANDOM_STATE, stratify=y)
+    pipe = Pipeline([("preprocess", WORKOUT_PREPROCESS),
+                     ("rf", RandomForestClassifier(n_estimators=80, max_depth=12,
+                                                   random_state=RANDOM_STATE,
+                                                   n_jobs=-1))])
+    pipe.fit(Xtr, ytr)
+    pred = pipe.predict(Xte)
+    metrics = classification_metrics(yte, pred, labels=sorted(y.unique()))
+    dummy = DummyClassifier(strategy="most_frequent").fit(Xtr, ytr)
+    metrics["dummy_accuracy"] = round(float(accuracy_score(
+        yte, dummy.predict(Xte))), 4)
+    classes = sorted(y.unique().tolist())
+    covered = set(classes) - set(PLAN_LAYOUTS)
+    if covered:
+        raise ValueError(f"PLAN_LAYOUTS missing layout for plan classes: {covered}")
+    bundle = {"pipeline": pipe, "classes": classes, "target": WORKOUT_TARGET,
+              "features": {"numeric": WORKOUT_FEATURE_NUMERIC,
+                           "categorical": WORKOUT_FEATURE_CATEGORICAL},
+              "train_rows": int(len(Xtr)), "test_rows": int(len(Xte))}
+    return bundle, metrics
 
 
-def _aggregate_importance(model: Pipeline, num_cols, cat_cols) -> list:
-    """Real RF importances, aggregated from one-hot back to base columns."""
-    try:
-        names = model.named_steps["preprocess"].get_feature_names_out()
-        imps = model.named_steps["clf"].feature_importances_
-    except Exception:
-        return []
-    agg = {}
-    for name, imp in zip(names, imps):
-        # names look like 'num__Age' or 'cat__Gender_Female'
-        base = str(name).split("__", 1)[-1]
-        for c in cat_cols:
-            if base == c or base.startswith(c + "_"):
-                base = c
-                break
-        agg[base] = agg.get(base, 0.0) + float(imp)
-    total = sum(agg.values()) or 1.0
-    return [{"feature": k, "importance": v / total}
-            for k, v in sorted(agg.items(), key=lambda kv: -kv[1])]
+def train_diet_regressor(df: pd.DataFrame) -> tuple[dict, dict]:
+    """RF regressor on nutrition_dataset.csv (profile -> calorie target + macros)."""
+    X = df[DIET_FEATURE_NUMERIC + DIET_FEATURE_CATEGORICAL].copy()
+    y = df[DIET_TARGETS].copy()
+    Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=TEST_SIZE,
+                                          random_state=RANDOM_STATE)
+    pipe = Pipeline([("preprocess", DIET_PREPROCESS),
+                     ("rf", RandomForestRegressor(n_estimators=80, max_depth=12,
+                                                  random_state=RANDOM_STATE,
+                                                  n_jobs=-1))])
+    pipe.fit(Xtr, ytr)
+    pred = pipe.predict(Xte)
+    dummy_pred = DummyRegressor(strategy="mean").fit(Xtr, ytr).predict(Xte)
+    metrics = {"targets": DIET_TARGETS, "per_target": {}}
+    for i, c in enumerate(DIET_TARGETS):
+        y_true_i, y_pred_i, y_base_i = (yte.values[:, i], pred[:, i], dummy_pred[:, i])
+        metrics["per_target"][c] = {
+            "mae": round(float(mean_absolute_error(y_true_i, y_pred_i)), 3),
+            "r2": round(float(r2_score(y_true_i, y_pred_i)), 3),
+            "baseline_mae": round(float(mean_absolute_error(y_true_i, y_base_i)), 3),
+        }
+    bundle = {"pipeline": pipe, "targets": DIET_TARGETS,
+              "features": {"numeric": DIET_FEATURE_NUMERIC,
+                           "categorical": DIET_FEATURE_CATEGORICAL},
+              "train_rows": int(len(Xtr)), "test_rows": int(len(Xte))}
+    return bundle, metrics
 
 
-def fit_knn(food: pd.DataFrame):
-    cols = [c for c in KNN_NUTRITION_COLS if c in food.columns]
-    Xn = food[cols].copy()
-    medians = Xn.median()
-    Xn = Xn.fillna(medians)
-    scaler = StandardScaler()
-    Xs = scaler.fit_transform(Xn)
-    nn = NearestNeighbors(n_neighbors=min(50, len(food)), metric="euclidean")
-    nn.fit(Xs)
-    return {"scaler": scaler, "nn": nn, "cols": cols, "medians": medians.to_dict()}
+def fit_knn(food: pd.DataFrame) -> dict:
+    """Scaled KNN over the Anuvaad per-100g catalog (same policy as before)."""
+    cols = KNN_NUTRITION_COLS
+    X = food[cols].fillna(0.0)
+    scaler = StandardScaler().fit(X)
+    nn = NearestNeighbors(n_neighbors=min(30, len(food))).fit(scaler.transform(X))
+    medians = {c: float(food[c].median()) for c in cols}
+    return {"cols": cols, "scaler": scaler, "nn": nn, "medians": medians}
 
 
 def main() -> None:
-    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    (REPORTS_DIR / "metrics").mkdir(parents=True, exist_ok=True)
+    for d in (ARTIFACTS_DIR, REPORTS_DIR / "metrics"):
+        d.mkdir(parents=True, exist_ok=True)
 
-    # --- diet classifier ---
-    diet_df = prepare_diet_frame()
-    diet_model, diet_metrics = train_diet(diet_df)
-    joblib.dump(diet_model, ARTIFACTS_DIR / "diet_model.joblib")
-    (REPORTS_DIR / "metrics" / "diet_metrics.json").write_text(json.dumps(diet_metrics, indent=2))
+    # --- workout classifier (smartfit) ---
+    workout = prepare_workout_frame()
+    print(f"workout frame: {workout.attrs['rows_before']} rows -> "
+          f"{workout.attrs['rows_after']} (dupes {workout.attrs['exact_dupes_removed']})")
+    workout_bundle, workout_metrics = train_workout_classifier(workout)
+    print(f"workout RF: acc={workout_metrics['accuracy']} "
+          f"f1_macro={workout_metrics['f1_macro']} "
+          f"dummy={workout_metrics['dummy_accuracy']}")
+
+    # --- diet macro regressor (nutrition_dataset) ---
+    nutrition = prepare_nutrition_frame()
+    print(f"nutrition frame: {nutrition.attrs['rows_before']} -> "
+          f"{nutrition.attrs['rows_after']} "
+          f"(junk {nutrition.attrs['junk_header_rows_removed']}, "
+          f"merged {nutrition.attrs['weight_maintenance_merged']}, "
+          f"bad {nutrition.attrs['nonpositive_missing_dropped']})")
+    diet_bundle, diet_metrics = train_diet_regressor(nutrition)
+    for target, m in diet_metrics["per_target"].items():
+        print(f"diet RF {target}: MAE={m['mae']} (baseline {m['baseline_mae']}) "
+              f"R2={m['r2']}")
+
+    # --- food catalog (Anuvaad INDB) + KNN bundle ---
+    food = prepare_food_catalog()
+    print(f"food catalog: {food.attrs['rows_before']} -> {food.attrs['rows_after']} "
+          f"(dupes {food.attrs['exact_dupes_removed']}, "
+          f"outliers {food.attrs['n_outliers_excluded']})")
+    knn = {"general": fit_knn(food)}
+    print(f"knn bundle: {len(food)} foods over {KNN_NUTRITION_COLS}")
+
+    # --- exercise library ---
+    library = load_exercise_library()
+    print(f"exercise library: {library.attrs['rows']} exercises")
+
+    # --- persist artifacts ---
+    workout = workout.reset_index(drop=True)
+    nutrition = nutrition.reset_index(drop=True)
+    food = food.reset_index(drop=True)
+    library = library.reset_index(drop=True)
+    workout.to_csv(ARTIFACTS_DIR / "workout_training_frame.csv", index=False)
+    nutrition.to_csv(ARTIFACTS_DIR / "nutrition_catalog.csv", index=False)
+    food.to_csv(ARTIFACTS_DIR / "food_catalog.csv", index=False)
+    library.to_json(ARTIFACTS_DIR / "exercise_library.json", orient="records")
+    import joblib
+    joblib.dump(workout_bundle, ARTIFACTS_DIR / "workout_model.joblib")
+    joblib.dump(diet_bundle, ARTIFACTS_DIR / "diet_model.joblib")
+    joblib.dump(knn, ARTIFACTS_DIR / "knn.joblib")
+
+    survey = survey_values()
+    # survey_values runs prep again (cheap, deterministic); keep the same frame
+    provenance = {
+        "workout_training_frame.csv": {
+            "source": "datasets/smartfit_workout_dataset.csv", **workout.attrs},
+        "nutrition_catalog.csv": {
+            "source": "datasets/nutrition_dataset.csv", **nutrition.attrs},
+        "food_catalog.csv": {
+            "source": "datasets/Anuvaad_INDB_2024.11.xlsx", **food.attrs},
+        "exercise_library.json": {
+            "source": "datasets/exercises.json", **library.attrs},
+    }
+    meta = {
+        "version": "2.0",
+        "random_state": RANDOM_STATE, "test_size": TEST_SIZE,
+        "data": provenance,
+        "readable": {
+            "workout": f"RF classifier on smartfit_workout_dataset.csv: "
+                       f"features={WORKOUT_FEATURE_NUMERIC + WORKOUT_FEATURE_CATEGORICAL}, "
+                       f"target={WORKOUT_TARGET}, {len(workout_bundle['classes'])} plan classes",
+            "diet": f"RF regressor on nutrition_dataset.csv: "
+                    f"features={DIET_FEATURE_NUMERIC + DIET_FEATURE_CATEGORICAL}, "
+                    f"targets={DIET_TARGETS}",
+            "food_knn": "scaled KNN over Anuvaad per-100g columns "
+                        f"{KNN_NUTRITION_COLS} (goal reference vectors)",
+        },
+        "workout_metrics": workout_metrics,
+        "diet_metrics": diet_metrics,
+        "values": survey,
+        "allergen_policy": ("The Anuvaad food DB has NO allergen flags: any "
+                            "requested allergy fails closed (all foods excluded "
+                            "with a warning). Compatibility is never assumed."),
+        "notes": [
+            "Trained ONLY from the five datasets/ files present now; the old "
+            "boostcamp program catalog, diet_recommendations_dataset.csv, "
+            "healthy_foods_database.csv and indian_food.csv are retired.",
+            "Compact RFs (80 trees, max_depth 12) chosen deliberately: test "
+            "metrics identical to larger configs with ~10x smaller artifacts.",
+            "Workout plan layout uses datasets/exercises.json via the "
+            "documented mapping in ml/plan_layout.py.",
+            "Duration estimates are heuristics: no per-plan durations exist "
+            "in any training dataset.",
+            "Informational only — not medical advice.",
+        ],
+    }
+    (ARTIFACTS_DIR / "meta.json").write_text(json.dumps(meta, indent=2))
     diet_meta = {
-        "target": DIET_TARGET,
-        "target_distribution": diet_metrics["target_distribution"],
-        "accuracy": diet_metrics["random_forest"]["accuracy"],
-        "f1_macro": diet_metrics["random_forest"]["f1_macro"],
-        "f1_weighted": diet_metrics["random_forest"]["f1_weighted"],
-        "dummy_accuracy": diet_metrics["dummy_stratified"]["accuracy"],
-        "n_train": diet_metrics["n_train"], "n_test": diet_metrics["n_test"],
-        "features_numeric": diet_metrics["features_numeric"],
-        "features_categorical": diet_metrics["features_categorical"],
-        "excluded": diet_metrics["excluded"],
-        "feature_importance": diet_metrics["feature_importance"],
-        "goal_is_not_a_feature": True,
-        "disclaimer": ("Predicted category is a model output, not a medical diagnosis; "
-                       "it is predicted from the health profile only, not the user's goal."),
+        "targets": DIET_TARGETS,
+        "features": {"numeric": DIET_FEATURE_NUMERIC,
+                     "categorical": DIET_FEATURE_CATEGORICAL},
+        "metrics": diet_metrics["per_target"],
+        "train_rows": diet_bundle["train_rows"], "test_rows": diet_bundle["test_rows"],
+        "data_source": "datasets/nutrition_dataset.csv",
+        "disclaimer": ("Model prediction from profile only — informational, "
+                       "not medical advice."),
     }
     (ARTIFACTS_DIR / "diet_meta.json").write_text(json.dumps(diet_meta, indent=2))
-
-    # --- Indian-food catalog + KNN (single active catalog) ---
-    full = prepare_food_catalog()
-    food = prepare_indian_catalog()
-    food.to_csv(ARTIFACTS_DIR / "indian_catalog.csv", index=False)
-    knn = {"general": fit_knn(food)}
-    joblib.dump(knn, ARTIFACTS_DIR / "knn.joblib")
-    print(f"indian catalog: {len(food)} rows "
-          f"(from {len(full)} after documented filter; "
-          f"dishes={(food['cuisine_evidence'] == 'indian_dish').sum()})")
-    # nutrition/health-score baseline reference (for recommender comparison)
-    baseline_info = {"method": "health_score rank desc, then proteins_100g desc",
-                     "n_items": len(food),
-                     "limitation": "health_score is near-constant (76% equal 60)"}
-
-    # --- recipe catalog (cleaned copy; text only, no nutrition merged in) ---
-    from .recipes import prepare_recipe_catalog
-    recipes, recipe_stats = prepare_recipe_catalog()
-    recipes.drop(columns=["parsed_ingredients"]).to_csv(
-        ARTIFACTS_DIR / "recipe_catalog.csv", index=False)
-    (REPORTS_DIR / "metrics" / "recipe_stats.json").write_text(
-        json.dumps(recipe_stats, indent=2))
-    print(f"recipes: {recipe_stats['rows_after']} rows "
-          f"(dupes removed {recipe_stats['exact_dupes_removed']})")
-
-    # --- workout catalog (no classifier: no valid target; Gym Members data absent) ---
-    workout = prepare_workout_catalog()
-    workout.to_csv(ARTIFACTS_DIR / "workout_catalog.csv", index=False)
-
-    meta = {"version": "1.2", "random_state": RANDOM_STATE,
-            "diet_target": DIET_TARGET,
-            "workout_classifier": "BLOCKED: no defensible target (Gym Members dataset absent; "
-                                  "program titles are catalog entries, not outcome labels)",
-            "food_catalog": {"file": "indian_catalog.csv",
-                             "source": "healthy_foods_database.csv (filtered, see ml/indian_catalog.py)",
-                             "rows": len(food),
-                             "indian_dishes": int((food["cuisine_evidence"] == "indian_dish").sum()),
-                             "staple_ingredients": int((food["cuisine_evidence"] == "staple_ingredient").sum()),
-                             "allergen_data": False,
-                             "use": "sole active food catalog: Indian-food-only recommendations"},
-            "knn_features": knn["general"]["cols"]}
-    (ARTIFACTS_DIR / "meta.json").write_text(json.dumps(meta, indent=2))
-
-    rf, du = diet_metrics["random_forest"], diet_metrics["dummy_stratified"]
-    report = f"""# Evaluation Report
-
-## Diet-category prediction (target `{DIET_TARGET}`, n=1000, test n={diet_metrics['n_test']})
-Excluded from features: Patient_ID (identifier), Disease_Type (perfect target proxy/leakage).
-Single stratified 80/20 split, seed {RANDOM_STATE}. Small dataset — generalization limits apply.
-
-| model | accuracy | F1 macro | F1 weighted |
-|---|---|---|---|
-| RandomForest (200 trees, balanced) | {rf['accuracy']} | {rf['f1_macro']} | {rf['f1_weighted']} |
-| Dummy (stratified) | {du['accuracy']} | {du['f1_macro']} | {du['f1_weighted']} |
-
-Confusion matrix (RF, classes {rf['classes']}):
-{rf['confusion_matrix']}
-
-Note: RF barely beats the stratified dummy baseline because the perfectly
-predictive Disease_Type column was excluded as leakage; remaining features carry
-weak signal. Treat as informational triage, not diagnosis.
-
-## Workout recommendation
-No supervised classifier: Gym Members Exercise dataset absent locally and program
-titles/goals are catalog attributes, not outcome labels. Workout output = hard-constraint
-filtering + transparent ranking over the 605k-row exercise catalog (2,598 programs).
-Offline checks: constraint-satisfaction rate, valid-result rate, empty-result handling
-(see tests).
-
-## KNN food ranking
-Features (scaled): {knn['general']['cols']}. Sole active catalog: Indian-food derived
-catalog ({len(food)} rows from healthy_foods_database via ml/indian_catalog.py).
-Hard dietary/allergy filters applied BEFORE ranking; the Indian catalog has no
-allergen data, so any requested allergy excludes all candidates with a warning.
-No relevance ground truth exists → no Precision@K/NDCG claimed; offline checks cover
-constraint satisfaction, top-K shape, determinism, and baseline comparison vs {baseline_info['method']}
-({baseline_info['limitation']}).
-"""
-    (REPORTS_DIR / "evaluation_report.md").write_text(report)
-    print(report)
-    print(f"Saved artifacts to {ARTIFACTS_DIR}")
+    (REPORTS_DIR / "metrics" / "workout_metrics.json").write_text(
+        json.dumps({"data": workout.attrs, **workout_metrics}, indent=2))
+    (REPORTS_DIR / "metrics" / "diet_metrics.json").write_text(
+        json.dumps({"data": nutrition.attrs, **diet_metrics}, indent=2))
+    (REPORTS_DIR / "metrics" / "food_knn.json").write_text(
+        json.dumps({"rows": int(len(food)), "cols": KNN_NUTRITION_COLS,
+                    "goal_targets": "config.GOAL_NUTRITION_TARGETS"}, indent=2))
+    print("training complete -> artifacts/ updated")
 
 
 if __name__ == "__main__":

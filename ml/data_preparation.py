@@ -1,138 +1,179 @@
-"""Reproducible data preparation: build consolidated catalogs + diet frame.
+"""Reproducible data preparation from the five current datasets/ files only.
 
-Outputs (in artifacts/):
-  indian_catalog.csv   - active Indian-food derived catalog
-  workout_catalog.csv  - cleaned exercise-level catalog (selected columns)
+Outputs consumed by ml/train.py (and ultimately artifacts/):
+  workout frame   <- datasets/smartfit_workout_dataset.csv
+  nutrition frame <- datasets/nutrition_dataset.csv
+  food catalog    <- datasets/Anuvaad_INDB_2024.11.xlsx (per-100g, Indian DB)
+  exercise library<- datasets/exercises.json
+
+Rules:
+- Raw source files are NEVER edited; cleaning happens here and every removed
+  row/badged value is counted in the returned .attrs so training logs it.
+- The old boostcamp program catalog (program_summary.csv), the missing diet/
+  healthy-foods files, and indian_food.csv are RETIRED and not referenced.
 """
-import ast
+import json
 from pathlib import Path
 
 import pandas as pd
 
 from .config import (
-    ARTIFACTS_DIR, DIET_FILE, FOOD_PRIMARY_FILE, WORKOUT_DETAILED_FILE,
-    DIET_TARGET, DIET_ID_COLS, DIET_LEAKAGE_COLS,
+    WORKOUT_DATA_FILE, NUTRITION_DATA_FILE, FOOD_DB_FILE, EXERCISES_FILE,
+    WORKOUT_TARGET, WORKOUT_FEATURES, DIET_TARGETS, DIET_FEATURES,
 )
-from .indian_catalog import build_indian_catalog
-
-WORKOUT_KEEP = ["title", "level", "goal", "equipment", "program_length",
-                "time_per_workout", "week", "day", "exercise_name", "sets", "reps", "intensity"]
 
 
-def _parse_list_cell(s):
-    """Parse \"['A', 'B']\" style cells -> list of str; plain strings -> [s]."""
-    if pd.isna(s):
-        return []
-    t = str(s).strip()
-    if t.startswith("["):
-        try:
-            v = ast.literal_eval(t)
-            return [str(x).strip() for x in v] if isinstance(v, list) else [t]
-        except Exception:
-            return [t]
-    return [t]
+def prepare_workout_frame(src: Path = WORKOUT_DATA_FILE) -> pd.DataFrame:
+    """Cleaned training frame for the workout RF classifier.
 
-
-def prepare_food_catalog(src: Path = FOOD_PRIMARY_FILE) -> pd.DataFrame:
-    """Build the consolidated catalog, normalized to canonical per-100g columns.
-
-    healthy_foods_database adapter (documented unit handling):
-      food_name -> product_name (kept verbatim; never renamed/translated)
-      calories -> energy_kcal, protein_g -> proteins_100g, fat_g -> fat_100g,
-      carbs_g -> carbs_100g, sugar_g -> sugars_100g, fiber_g -> fiber_100g (all per 100g)
-      sodium_mg -> sodium_100g  (mg divided by 1000; conversion recorded in manifest)
-    Rows with unit-error outliers (calories > 950 per 100g, sodium_mg > 100000)
-    are excluded from the active catalog; the source file is untouched.
-    No allergen-flag columns are created: absent columns mean "unknown", and the
-    recommender must never treat them as allergen-free.
+    Cleaning: exact-duplicate rows dropped (counted); Injury NaN -> "None"
+    (the smartfit file encodes "no injury" as NaN); required columns asserted.
     """
     df = pd.read_csv(src)
     before = len(df)
+    required = WORKOUT_FEATURES + [WORKOUT_TARGET]
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"workout dataset missing columns: {missing}")
     n_dupes = int(df.duplicated().sum())
     df = df.drop_duplicates().reset_index(drop=True)
-    rename = {"food_name": "product_name", "calories": "energy_kcal",
-              "protein_g": "proteins_100g", "fat_g": "fat_100g",
-              "carbs_g": "carbs_100g", "sugar_g": "sugars_100g",
-              "fiber_g": "fiber_100g"}
+    n_no_injury = int(df["Injury"].isna().sum())
+    df["Injury"] = df["Injury"].fillna("None")
+    # Experience is optional upstream too (20 raw NaNs): explicit training value
+    # 'Unspecified' keeps missing as a real model category (NaN -> 'unspecified'
+    # in code is worse: it encodes junk text into a categorical).
+    n_no_exp = int(df["Experience"].isna().sum())
+    df["Experience"] = df["Experience"].fillna("Unspecified")
+    for c in WORKOUT_FEATURES:
+        df[c] = df[c].astype(str).str.strip()
+    bad = int(df[WORKOUT_TARGET].isna().sum())
+    df = df[df[WORKOUT_TARGET].notna()].reset_index(drop=True)
+    df.attrs.update(rows_before=before, exact_dupes_removed=n_dupes,
+                    injury_nan_to_None=n_no_injury,
+                    experience_nan_to_Unspecified=n_no_exp,
+                    target_nan_dropped=bad, rows_after=len(df))
+    return df
+
+
+def prepare_nutrition_frame(src: Path = NUTRITION_DATA_FILE) -> pd.DataFrame:
+    """Cleaned training frame for the diet macro RF regressor + meal picker.
+
+    Cleaning (all counted): rows whose first cell repeats the header (junk
+    header-duplicate row) dropped; 'Weight Maintenance' folded into
+    'Maintenance' (same meaning, counted); target columns coerced numeric and
+    non-positive/missing rows dropped (never invented).
+    """
+    df = pd.read_csv(src)
+    before = len(df)
+    required = DIET_FEATURES + DIET_TARGETS
+    missing = [c for c in required if c not in df.columns]
+    if missing:
+        raise ValueError(f"nutrition dataset missing columns: {missing}")
+    # Junk rows: literal header repeated as data (first col == 'Dietary Preference' etc.)
+    junk = df["Dietary Preference"].astype(str).str.strip() == "Dietary Preference"
+    n_junk = int(junk.sum())
+    df = df[~junk].reset_index(drop=True)
+    n_wm = int((df["Fitness Goal"] == "Weight Maintenance").sum())
+    df["Fitness Goal"] = df["Fitness Goal"].replace({"Weight Maintenance": "Maintenance"})
+    for c in DIET_FEATURES:
+        df[c] = df[c].astype(str).str.strip()
+    for c in DIET_TARGETS:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+    bad = df[DIET_TARGETS].isna().any(axis=1) | (df["Daily Calorie Target"] <= 0)
+    n_bad = int(bad.sum())
+    df = df[~bad].reset_index(drop=True)
+    df.attrs.update(rows_before=before, junk_header_rows_removed=n_junk,
+                    weight_maintenance_merged=n_wm, nonpositive_missing_dropped=n_bad,
+                    rows_after=len(df))
+    return df
+
+
+def prepare_food_catalog(src: Path = FOOD_DB_FILE) -> pd.DataFrame:
+    """Anuvaad INDB adapter -> canonical per-100g food catalog.
+
+    ANUVAAD_INDB values are per 100 g (Indian food composition database).
+    Adapter (documented unit handling):
+      food_name -> product_name (kept verbatim; never renamed/translated)
+      energy_kcal stays, protein_g -> proteins_100g, fat_g -> fat_100g,
+      carb_g -> carbs_100g, freesugar_g -> sugars_100g, fibre_g -> fiber_100g
+      sodium_mg -> sodium_100g (mg divided by 1000; recorded in meta)
+    Unit-error outliers (energy > 950 kcal/100 g or sodium > 100 g/100 g)
+    are excluded from the active catalog; count recorded in attrs.
+    No allergen-flag columns are created: absent columns mean "unknown", and
+    the recommender must never treat them as allergen-free.
+    """
+    df = pd.read_excel(src)
+    before = len(df)
+    n_dupes = int(df["food_code"].duplicated().sum())
+    df = df.drop_duplicates(subset=["food_code"]).reset_index(drop=True)
+    rename = {"food_name": "product_name", "protein_g": "proteins_100g",
+              "fat_g": "fat_100g", "carb_g": "carbs_100g",
+              "freesugar_g": "sugars_100g", "fibre_g": "fiber_100g"}
     df = df.rename(columns={k: v for k, v in rename.items() if k in df.columns})
-    if "sodium_mg" in df.columns:
-        df["sodium_100g"] = pd.to_numeric(df["sodium_mg"], errors="coerce") / 1000.0
-        df = df.drop(columns=["sodium_mg"])
+    df["sodium_100g"] = pd.to_numeric(df.pop("sodium_mg"), errors="coerce") / 1000.0
     for c in ["energy_kcal", "fat_100g", "carbs_100g", "sugars_100g",
-              "fiber_100g", "proteins_100g", "sodium_100g"]:
-        if c in df.columns:
-            df[c] = pd.to_numeric(df[c], errors="coerce")
-    # Normalize boolean flags only if flag columns exist (they don't
-    # in the healthy catalog — and must not be invented here).
-    for c in [c for c in df.columns if c.startswith("contains_")]:
-        df[c] = df[c].map({True: True, False: False, "True": True, "False": False,
-                           "true": True, "false": False}).fillna(False).astype(bool)
+              "fiber_100g", "proteins_100g", "sodium_100g", "energy_kj"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
     bad = (df["energy_kcal"] > 950) | (df["sodium_100g"] > 100)
     n_outliers = int(bad.sum())
     df = df[~bad].reset_index(drop=True)
-    df.attrs["rows_before"] = before
-    df.attrs["n_dupes_removed"] = n_dupes
-    df.attrs["n_outliers_excluded"] = n_outliers
-    return df
+    keep = ["food_code", "product_name", "energy_kj"] + [
+        c for c in ["energy_kcal", "proteins_100g", "fat_100g", "carbs_100g",
+                    "sugars_100g", "fiber_100g", "sodium_100g"] if c in df.columns]
+    out = df[keep].copy()
+    out.attrs.update(rows_before=before, exact_dupes_removed=n_dupes,
+                     n_outliers_excluded=n_outliers, rows_after=len(out))
+    return out
 
 
-def prepare_indian_catalog(src: Path = FOOD_PRIMARY_FILE) -> pd.DataFrame:
-    """Active Indian-food catalog: healthy adapter + documented Indian filter.
+def load_exercise_library(src: Path = EXERCISES_FILE) -> pd.DataFrame:
+    """Fixed-BC exercise library -> slim deterministic serving frame.
 
-    Returns canonical per-100g columns plus cuisine_evidence/evidence_term/
-    is_branded metadata. Names kept verbatim. Raw source file untouched.
+    Kept fields: id, name, body_part, equipment, category, instructions (en).
+    Order is preserved from the source file; layout code depends on stable id
+    order, never on dict iteration quirks.
     """
-    food = prepare_food_catalog(src)
-    before = len(food)
-    indian = build_indian_catalog(food, name_col="product_name")
-    indian.attrs["rows_before_indian_filter"] = before
-    return indian
-
-
-def prepare_workout_catalog(src: Path = WORKOUT_DETAILED_FILE) -> pd.DataFrame:
-    df = pd.read_csv(src, usecols=WORKOUT_KEEP)
-    df = df.drop_duplicates().reset_index(drop=True)  # exact dupes only; keeps distinct sets/reps/day rows
-    df["level_list"] = df["level"].map(_parse_list_cell)
-    df["goal_list"] = df["goal"].map(_parse_list_cell)
-    for c in ["program_length", "time_per_workout", "week", "day", "sets", "reps", "intensity"]:
-        df[c] = pd.to_numeric(df[c], errors="coerce")
+    raw = json.loads(Path(src).read_text())
+    rows = []
+    for i, e in enumerate(raw):
+        instr = (e.get("instructions") or {}).get("en") or ""
+        rows.append({"order": i,
+                     "id": e.get("id"),
+                     "name": e.get("name"),
+                     "body_part": (e.get("body_part") or "").strip().lower(),
+                     "equipment": (e.get("equipment") or "").strip().lower(),
+                     "category": (e.get("category") or "").strip().lower(),
+                     "instruction_steps": instr})
+    df = pd.DataFrame(rows)
+    df = df.dropna(subset=["name"]).reset_index(drop=True)
+    df.attrs.update(rows=len(df), source=src.name)
     return df
 
 
-def prepare_diet_frame(src: Path = DIET_FILE) -> pd.DataFrame:
-    df = pd.read_csv(src)
-    if DIET_TARGET not in df.columns:
-        raise ValueError(f"Missing required target column {DIET_TARGET!r} in {src}")
-    if df[DIET_TARGET].isna().any():
-        raise ValueError("Diet target contains missing labels")
-    df = df.drop_duplicates().reset_index(drop=True)
-    # Missing categoricals -> explicit "None" level (33% missing restrictions/allergies, 20% disease)
-    for c in ["Dietary_Restrictions", "Allergies", "Disease_Type"]:
-        if c in df.columns:
-            df[c] = df[c].fillna("None")
-    return df
+def fitness_missing_mask(df: pd.DataFrame, cols: list) -> pd.Series:
+    """Per-row boolean: True if any requested nutrition column is missing."""
+    return df[cols].isna().any(axis=1)
 
 
-def diet_features(df: pd.DataFrame):
-    """Return (X, y) with IDs and leakage columns excluded. Raises if target missing."""
-    drop = [c for c in DIET_ID_COLS + DIET_LEAKAGE_COLS + [DIET_TARGET] if c in df.columns]
-    X = df.drop(columns=drop)
-    y = df[DIET_TARGET]
-    # guard: target/leakage must not be in features
-    assert DIET_TARGET not in X.columns and not any(c in X.columns for c in DIET_ID_COLS + DIET_LEAKAGE_COLS)
-    return X, y
+def survey_values() -> dict:
+    """All distinct categorical values the models were trained on.
 
-
-def main() -> None:
-    ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    food = prepare_indian_catalog()
-    food.to_csv(ARTIFACTS_DIR / "indian_catalog.csv", index=False)
-    print(f"indian catalog: {len(food)} rows "
-          f"(dishes={(food['cuisine_evidence'] == 'indian_dish').sum()})")
-    w = prepare_workout_catalog()
-    w.to_csv(ARTIFACTS_DIR / "workout_catalog.csv", index=False)
-    print(f"workout catalog: {len(w)} rows, {w['title'].nunique()} programs, {w['exercise_name'].nunique()} exercises")
-
-
-if __name__ == "__main__":
-    main()
+    Used by options endpoints so the UI can only submit values the model
+    actually understands (never guessed).
+    """
+    w = prepare_workout_frame()
+    n = prepare_nutrition_frame()
+    return {
+        "workout": {
+            "goals": sorted(w["Goal"].unique().tolist()),
+            "equipment": sorted(w["Equipment"].unique().tolist()),
+            "levels": sorted(w["Experience"].unique().tolist()),
+            "injuries": sorted(w["Injury"].unique().tolist()),
+            "plans": sorted(w[WORKOUT_TARGET].unique().tolist()),
+        },
+        "diet": {
+            "activity_levels": sorted(n["Activity Level"].unique().tolist()),
+            "fitness_goals": sorted(n["Fitness Goal"].unique().tolist()),
+            "dietary_preferences": sorted(n["Dietary Preference"].unique().tolist()),
+        },
+    }
