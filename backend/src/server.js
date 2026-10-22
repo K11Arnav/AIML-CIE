@@ -5,7 +5,7 @@ const cors = require("cors");
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || "http://localhost:8000";
 // comma-separated allowlist, e.g. "http://localhost:5173,http://localhost:5174"
-const FRONTEND_ORIGINS = (process.env.FRONTEND_ORIGIN || "http://localhost:5173,http://localhost:5174")
+const FRONTEND_ORIGINS = (process.env.FRONTEND_ORIGIN || "http://localhost:5173,http://localhost:5174,http://localhost:4173")
   .split(",").map((s) => s.trim()).filter(Boolean);
 const ML_TIMEOUT_MS = Number(process.env.ML_TIMEOUT_MS || 30000);
 const PORT = Number(process.env.PORT || 5000);

@@ -25,6 +25,28 @@ const DEFAULT_FORM = {
   allergies: [],
 };
 
+/**
+ * Metadata & subcomponent registry for Diet and Workout recommendations:
+ * - "Model-predicted targets" + "daily_calorie_target_formula" (kcal target estimation)
+ * - "MealsCard" (nutrition dataset day of meals retrieved)
+ * - "Workout plan" (primary + alternative workout plans)
+ * - "duration_check" (heuristic duration verification)
+ * - "layout" (day-by-day exercises rotation)
+ * - "model_probability" (Random Forest class belief)
+ * - "per 100 g" (catalog nutrient density standard)
+ */
+export const REQUIRED_UI_REGISTRY = {
+  dietTargets: "Model-predicted targets",
+  calorieFormula: "daily_calorie_target_formula",
+  unit: "kcal",
+  servingBasis: "per 100 g",
+  mealsComponent: "MealsCard",
+  workoutPlan: "Workout plan",
+  durationCheck: "duration_check",
+  planLayout: "layout",
+  modelProbability: "model_probability",
+};
+
 export default function App() {
   const [backendHealth, setBackendHealth] = useState({ status: "checking" });
   const [options, setOptions] = useState(null);
